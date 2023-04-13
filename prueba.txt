@@ -1,0 +1,3 @@
+Este es un archivo de prueba para git hub
+===============================================================
+cada quien reportese colocando nombre y apellido a continuacion:
