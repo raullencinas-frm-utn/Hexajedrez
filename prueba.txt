@@ -1,4 +1,4 @@
 Este es un archivo de prueba para git hub
 ===============================================================
 Cada quien reportese colocando nombre y apellido a continuacion:
-Raul Alejandro lencinas berenguer.
+Raul Alejandro lencinas berenguer
