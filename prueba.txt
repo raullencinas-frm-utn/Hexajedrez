@@ -6,3 +6,4 @@ Cada quien reportese colocando nombre y apellido a continuacion:
 + Leandro Javier Valdearenas
 + Giuliano Espejo Mezzabotta
 + Francisco Varberde
++ Elias Santilli
