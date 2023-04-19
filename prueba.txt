@@ -7,3 +7,4 @@ Cada quien reportese colocando nombre y apellido a continuacion:
 + Giuliano Espejo Mezzabotta
 + Francisco Varberde
 + Elias Santilli
++ Ezequiel Maureira
