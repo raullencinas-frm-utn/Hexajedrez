@@ -8,7 +8,7 @@ pygame.init()
 ANCHO_PANTALLA = 1100
 ALTO_PANTALLA = 700
 
-pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA),pygame.RESIZABLE)
+pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
 
 # Titulo de la pantall
@@ -25,6 +25,7 @@ COLOR_LETRAS = (255, 255, 255)
 # variables menu
 opcionesDeJuego = False
 pantallaDePausa = False
+pantallaDeOpciones = False
 
 # Funciones
 def dibujaTexto(texto, fuente, colorTexto, x, y):
@@ -53,19 +54,25 @@ unoContraDosCpuImg = pygame.image.load(
 hexajedrezImg = pygame.image.load("img/HEXajedrez.png").convert_alpha()
 
 # Imagen de fondo
-fondoRojoImg = cargar_imagen("img/Back_Red.png")
-fondoAmarilloImg = cargar_imagen("img/Back_Amarillo.png")
+
+fondoRojoImg = pygame.transform.scale(pygame.image.load('img/Back_Red.png').convert_alpha(),(ANCHO_PANTALLA, ALTO_PANTALLA))
+fondoAmarilloImg = pygame.transform.scale(pygame.image.load('img/Back_Amarillo.png').convert_alpha(),(ANCHO_PANTALLA, ALTO_PANTALLA))
+
 
 # Crear Botones
 botonUnoContraUno = Boton(304, 245, unoContraUnoImg, 1)
 botonUnoContraDos = Boton(304, 345, unoContraDosImg, 1)
 botonUnoContraCpu = Boton(304, 445, unoContraCpuImg, 1)
 botonUnoContraDosCpu = Boton(304, 545, unoContraDosCpuImg, 1)
-botonContinuar = Boton(304,245,pygame.font.SysFont("arialblack", 40).render("Continuar", True, (255,255,255)),1)
-botonOpciones = Boton(304,295,pygame.font.SysFont("arialblack", 40).render("Opciones", True, (255,255,255)),1)
-botonComoJugar = Boton(304,345,pygame.font.SysFont("arialblack", 40).render("Como jugar", True, (255,255,255)),1)
-botonCreditos = Boton(304,395,pygame.font.SysFont("arialblack", 40).render("Creditos", True, (255,255,255)),1)
-botonSalir = Boton(304,445,pygame.font.SysFont("arialblack", 40).render("Salir", True, (255,255,255)),1)
+botonContinuar = Boton(450 ,245,pygame.font.SysFont("arialblack", 40).render("Continuar", True, (255,255,255)),1)
+botonOpciones = Boton(450,295,pygame.font.SysFont("arialblack", 40).render("Opciones", True, (255,255,255)),1)
+botonComoJugar = Boton(450,345,pygame.font.SysFont("arialblack", 40).render("Como jugar", True, (255,255,255)),1)
+botonCreditos = Boton(450,395,pygame.font.SysFont("arialblack", 40).render("Creditos", True, (255,255,255)),1)
+botonSalir = Boton(450,445,pygame.font.SysFont("arialblack", 40).render("Salir", True, (255,255,255)),1)
+botonSonido = Boton(450,295,pygame.font.SysFont("arialblack", 40).render("Sonido", True, (255,255,255)),1)
+botonMusica = Boton(450,345,pygame.font.SysFont("arialblack", 40).render("Musica", True, (255,255,255)),1)
+botonDificultad = Boton(450,395,pygame.font.SysFont("arialblack", 40).render("Dificultad", True, (255,255,255)),1)
+botonVolver = Boton(450,445,pygame.font.SysFont("arialblack", 40).render("Volver", True, (255,255,255)),1)
 
 # bucle del juego
 ejecucion = True
@@ -76,13 +83,27 @@ while ejecucion:
         if botonContinuar.dibujar(pantalla):
             print("Continuar")
         if botonOpciones.dibujar(pantalla):
+            pantallaDeOpciones = True
             print("Opciones")
         if botonComoJugar.dibujar(pantalla):
             print("Como Jugar") 
         if botonCreditos.dibujar(pantalla):
             print("Creditos") 
         if botonSalir.dibujar(pantalla):
+            ejecucion = False
             print("Salir")  
+        if pantallaDeOpciones:
+            pantalla.fill((100, 200, 100))
+            if botonSonido.dibujar(pantalla):
+                print("Sonido")
+            if botonMusica.dibujar(pantalla):
+                print("Musica")
+            if botonDificultad.dibujar(pantalla):
+                print("Dificultad")
+            if botonVolver.dibujar(pantalla):
+                pantallaDeOpciones = False
+                print("Volver")
+                
     elif opcionesDeJuego == True:
         pantalla.blit(fondoAmarilloImg, (0, 0))
         pantalla.blit(hexajedrezImg, (100, 20))
@@ -97,7 +118,7 @@ while ejecucion:
     else:
         pantalla.blit(fondoRojoImg, (0, 0))
         # se dibuja el texto en la pantalla
-        dibujaTexto("Presione espacio para comenzar", fuente, COLOR_LETRAS, 200, 500)
+        dibujaTexto("Presione espacio para comenzar", fuente, COLOR_LETRAS, 304, 500)
 
     # Escucha eventos
     for evento in pygame.event.get():
@@ -105,9 +126,7 @@ while ejecucion:
         # si se presiona el boton de cierre se termina el bucle
         if evento.type == pygame.QUIT:
              ejecucion = False
-        elif evento.type == pygame.VIDEORESIZE:
-            ANCHO_PANTALLA, ALTO_PANTALLA = evento.size
-            pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA), pygame.RESIZABLE)
+        
         # si se aprieta una tecla se valida que
         elif evento.type == pygame.KEYDOWN:
             # si la tecla presionada es espacio
