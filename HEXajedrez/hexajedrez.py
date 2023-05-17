@@ -1,8 +1,7 @@
 import pygame
 from boton import Boton
 from imagen import Imagen
-from time import sleep
-
+from juego import Juego
 
 pygame.init()
 
@@ -12,7 +11,6 @@ ALTO_PANTALLA = 700
 
 # Se define el tamaño de la pantalla
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-
 
 # Titulo de la pantalla
 pygame.display.set_caption("HEXajedrez")
@@ -34,13 +32,11 @@ pantallaDeOpciones = False
 pantallaAzul = False
 
 # Funciones
-def dibujaTexto(texto, FUENTE, colorTexto, x, y):
+def dibujaTexto(texto, tamaño, colorTexto, x, y):
     """ Genenera un texto en pantalla con la FUENTE y color de texto elegidos en la 
     posición "x" e "y" de la pantalla con el texto elegido. """
-    img = FUENTE.render(texto, True, colorTexto)
+    img = pygame.font.Font("fnt/8-Bit.TTF",tamaño).render(texto, True, colorTexto)
     pantalla.blit(img, (x, y))
-
-
 
 # Imágenes del Menu
 unoContraUnoImg = Imagen("img/boton_uno_contra_uno.png")
@@ -125,11 +121,10 @@ while ejecucion:
             # Se dibuja el fondo amarillo
             pantalla.blit(fondoAmarilloImg.redimensionar(ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
             # Se muestra el titulo
-            pantalla.blit(hexajedrezImg.redimensionar(ANCHO_PANTALLA, ALTO_PANTALLA), (100, 20))
+            pantalla.blit(hexajedrezImg.obtenerImagen(), (100, 20))
             # Se dibujan los botones de los modos de juego y al presionarlos cambia la pantalla
             if botonUnoContraUno.dibujar(pantalla, "Centrado"):
-                pantallaAzul = True
-                print("inicia juego 1 contra 1")
+                Juego.iniciar()
             if botonUnoContraDos.dibujar(pantalla, "Centrado"):
                 pantallaAzul = True
                 print("inicia juego 1 contra 2")
@@ -144,7 +139,8 @@ while ejecucion:
         # se dibuja el fondo rojo
         pantalla.blit(fondoRojoImg.redimensionar(ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
         # se dibuja el texto en la pantalla
-        dibujaTexto("Presione espacio para comenzar", FUENTE, BLANCO, 130, 500)
+        dibujaTexto("Presione ESPACIO para comenzar",30, BLANCO, 130, 500)
+        dibujaTexto("o ESCAPE para mas opciones",20, BLANCO, 295, 550)
 
     # Escucha eventos
     for evento in pygame.event.get():
