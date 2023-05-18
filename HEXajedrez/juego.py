@@ -4,13 +4,15 @@ from hexCoord import HexCoord
 from hexCasilla import HexCasilla
 from pixel import PixelCoord
 from hexPixelAdaptador import HexPixelAdaptador
+from piezas import Piezas
 class Juego:
     
-    def __init__(self,x):
+    def __init__(self,x,colores: str):
         # Dimensión del juego.
         self.AREA_JUEGO:PixelCoord = PixelCoord(x*0.63, x*0.63)  
         # Dimensión adicional necesaria para la GUI.
-        self.AREA_ESTADO:PixelCoord = PixelCoord(x*0.36, 0) 
+        self.AREA_ESTADO:PixelCoord = PixelCoord(x*0.36, 0)
+        self.piezas = Piezas(colores) 
         
 
     def iniciar(self):
@@ -31,11 +33,23 @@ class Juego:
         HEX_COLORES: list[tuple] = [(60, 120, 60),(40, 40, 200),(184, 40, 50)]  # Lista de los colores de las casillas.
 
         ADAPTADOR: HexPixelAdaptador = HexPixelAdaptador(AREA_JUEGO, ORIGEN_JUEGO, HEX_RADIO)  # Adapta los hexagonos a pixeles.
+        AREA_PIEZA: PixelCoord = PixelCoord(60, 60) / 2 
         
+        piezas = self.piezas
+        imagenesDePiezas = piezas.piezasImagenes(piezas.colores)
+
 
         def dibujaHex(coordenada: HexCoord, color: tuple, llenar=False):
             """Dibuja un hexagono en la pantalla."""
             pygame.draw.polygon(PANTALLA, color , ADAPTADOR.getVertices(coordenada), 0 if llenar else 3)
+        def dibujarPiezas(casilla: HexCasilla):
+            pixelCoords: PixelCoord = ADAPTADOR.hexAPixel(casilla.coordenada)
+            
+            
+            if casilla.estado is not None:
+                # Don't draw the piece if it's in a user move, or an AI move.
+              
+                PANTALLA.blit(imagenesDePiezas[casilla.estado], pixelCoords - AREA_PIEZA)
 
         juegoEjecutandose = True
         
@@ -59,11 +73,11 @@ class Juego:
             for casilla in HEX_TABLERO:
                 color: tuple[int, int, int] = HEX_COLORES[(casilla.coordenada.q - casilla.coordenada.r) % 3]
                 dibujaHex(casilla.coordenada, color, llenar=True)
-            
+                
             # Dibuja el borde negro.
             for casilla in HEX_TABLERO:
                 dibujaHex(casilla.coordenada, (20, 20, 20))
-
+                dibujarPiezas(casilla)
             # se dibuja la linea que va a separar el tablero con la GUI de informacion
             pygame.draw.line(PANTALLA,(62,48,92),(ANCHO_JUEGO, 0), (ANCHO_JUEGO, ALTO_JUEGO),13)
 

@@ -125,7 +125,7 @@ while ejecucion:
             pantalla.blit(hexajedrezImg.obtenerImagen(), (100, 20))
             # Se dibujan los botones de los modos de juego y al presionarlos cambia la pantalla
             if botonUnoContraUno.dibujar(pantalla, "Centrado"):
-                Juego(ANCHO_PANTALLA).iniciar()
+                Juego(ANCHO_PANTALLA,"bn").iniciar()
             if botonUnoContraDos.dibujar(pantalla, "Centrado"):
                 pantallaAzul = True
                 print("inicia juego 1 contra 2")
