@@ -2,6 +2,7 @@ import pygame
 from boton import Boton
 from imagen import Imagen
 from juego import Juego
+from tablero import Tablero
 
 pygame.init()
 
