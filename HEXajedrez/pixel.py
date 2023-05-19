@@ -1,7 +1,9 @@
 import math
 
 class PixelCoord:
+    """Clase contenedora de coordenadas x,y en pixeles."""
     def __init__(self, x, y):
+        """Constructor de el contenedor de coordenadas."""
         self.x = x
         self.y = y
 
