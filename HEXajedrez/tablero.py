@@ -1,7 +1,7 @@
-from __future__ import annotations  # Necessary to use the class as a type annotation in its own members.
+from __future__ import annotations  # Necesario para usar la clase como anotacion de tipo en sus propios miembros.
 
 import copy
-from typing import Optional  # For T | None annotations.
+from typing import Optional  
 from typing import Union
 from hexCoord import  HexCoord
 from hexCasilla import HexCasilla
@@ -10,14 +10,17 @@ from piezas import Piezas
 class Tablero:
     """
     Una clase sobre el tablero del juego.
-    Proporciona métodos para hacer movimientos, generar tableros comunes, movimientos de una coordenada y detectar Jaque y Jaque Mate.
+    Proporciona metodos para hacer movimientos, generar tableros comunes, movimientos de una coordenada y detectar Jaque y Jaque Mate.
     """
     def __init__(self,colores: str, casillas=None):
-            if casillas is None:
-                casillas = dict()
-            self.casillas: dict[int, HexCasilla] = casillas
-            self.coordenadasACasillas: dict[HexCoord, int] = dict()
-            self.piezas = Piezas(colores)
+        """Constructor del tablero."""
+        if casillas is None:
+            casillas = dict()
+        self.casillas: dict[int, HexCasilla] = casillas
+        self.coordenadasACasillas: dict[HexCoord, int] = dict()
+        self.piezas = Piezas(colores)
+        self.movimientos = self.piezas.movimientos()
+
     def __iter__(self):
         """Regrese un iterador de las coordenadas sobre el mapa."""
         return iter(self.casillas.values())
@@ -38,7 +41,7 @@ class Tablero:
 
     def __contains__(self, item: HexCoord) -> bool:
         """
-        Verifica que la coordenada esta en el mapa.
+        Verifica que la coordenada se encuentra en el mapa.
         """
         if type(item) is HexCoord:
             return item in self.coordenadasACasillas.keys()
@@ -46,11 +49,8 @@ class Tablero:
             return item in self.casillas.keys()
 
     @staticmethod
-    def aPartirDeRadio(radio: int,colores:str) -> Tablero:
-        """
-        Genera un mapa de haxagonos de un cierto radio.
-
-        """
+    def generarConRadio(radio: int,colores:str) -> Tablero:
+        """Genera un mapa de hexagonos de un cierto radio."""
         tablero = Tablero(colores)
         i = 0
         for p in range(-radio, radio + 1):
@@ -64,9 +64,9 @@ class Tablero:
         return tablero
 
     @staticmethod
-    def aPartirDeGlinski(colores: str) -> Tablero:
-        """Generar un mapa de hexagonos de una variante Glinski."""
-        #coordenadas de cada una de las piezas segun De Dave McCooey
+    def generarMcCooey(colores: str) -> Tablero:
+        """Generar un mapa de hexagonos de una variante Dave McCooey."""
+        #coordenadas de cada una de las piezas de acuerdo a la variante de Dave McCooey
         
         McCooeyPos: dict[str, list[tuple]] = {
                 "b_peon": [(-n, -2, n + 2) for n in range(4)] + [(n, -n - 2, 2) for n in range(4)],
@@ -76,9 +76,10 @@ class Tablero:
                 "b_reina": [(-1, -4, 5)],
                 "b_rey": [(1, -5, 4)]
         }
-        #chequea si la variable colores termina con r
+
+        # Verifica si hay 3 jugadores.
         if colores.endswith("r"):
-            #en el caso que sea r da la posicion para 3 jugadores, blanco negro y rojo
+            # Realiza las posiciones de las piezas para 3 jugadores: blanco, negro y rojo
             McCooeyPos.update({
                 "n_peon": [(-2-n, 2, +n ) for n in range(4)] + [(-2, 2 +n , -n) for n in range(4)],
                 "n_alfil": [(-5, 5, 0), (-4, 4, 0), (-3, 3, 0)],
@@ -95,7 +96,7 @@ class Tablero:
                 "r_caballo": [( 3, 1, -4), ( 4, -1, -3)],
             })
         else:
-            #en el caso que no termine en r da solo para 2 jugadores blanco y negro
+            # Realiza las posiciones de las piezas para 2 jugadores: blanco y negro
             McCooeyPos.update({
                 "b_peon": [(-n, -2, n + 2) for n in range(4)] + [(n, -n - 2, 2) for n in range(4)],
                 "b_caballo": [(-1, -3, 4), (1, -4, 3)],
@@ -112,9 +113,8 @@ class Tablero:
                 "n_caballo": [(1, 3, -4), (-1, 4, -3)],
                 
             })
-
         # Generar un mapa inicial.
-        mapaInicial: Tablero = Tablero.aPartirDeRadio(5,colores)
+        mapaInicial: Tablero = Tablero.generarConRadio(5,colores)
         
         for pieza, listaPosiciones in McCooeyPos.items():
             for posicion in listaPosiciones:
@@ -122,3 +122,45 @@ class Tablero:
 
         return mapaInicial
 
+    def generarMovimientos(self, posInicial: HexCoord) -> list[HexCoord]:
+        """
+        Genera todos los posibles movimientos a partir de un hexagono inicial
+        Comprueba a donde puede moverse hasta que deba detenerse.
+        """
+        coordPiezaInicial: Optional[str] = self[posInicial]
+
+        # Si no se encuentra nada en el hexagono, se detiene.
+        if coordPiezaInicial is None:
+            return []
+
+        # Una pieza siempre puede moverse al hexagono inicial.
+        movimientosValidos: list[HexCoord] = [posInicial]
+
+        for orientacion in self.movimientos[coordPiezaInicial]:
+            # Convierte la tupla de 3 valores en una coordenada axial / hexagonal.
+            orientacion: HexCoord = HexCoord(*orientacion)
+            hexagonoActual: HexCoord = posInicial
+
+            while True:
+                # Viaja 1 hexagono en la direccion indicada.
+                hexagonoActual += orientacion
+
+                # Si la coordenada esta fuera del tablero, se detiene.
+                if hexagonoActual not in self:
+                    break
+
+                # Si el movimiento es valido, se agrega a la lista.
+                movimientosValidos.append(hexagonoActual)
+
+                # Si hay una pieza en el hexagono, se detiene.
+                if self[hexagonoActual] is not None:
+                    break
+
+        return movimientosValidos
+
+    def moverPieza(self, posInicial: HexCoord, posFinal: HexCoord,desde : str):
+        """Realiza el movimiento desde posicion inicial hasta la posicion final."""
+        if posInicial == posFinal:
+            return
+        self[posFinal] = self[posInicial]
+        self[posInicial] = None
