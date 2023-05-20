@@ -1,18 +1,21 @@
-from __future__ import annotations  # Necesario para usar la clase como anotacion de tipo en sus propios miembros.
+# Necesario para usar la clase como anotacion de tipo en sus propios miembros.
+from __future__ import annotations
 
 import copy
-from typing import Optional  
+from typing import Optional
 from typing import Union
-from hexCoord import  HexCoord
+from hexCoord import HexCoord
 from hexCasilla import HexCasilla
 from piezas import Piezas
+
 
 class Tablero:
     """
     Una clase sobre el tablero del juego.
     Proporciona metodos para hacer movimientos, generar tableros comunes, movimientos de una coordenada y detectar Jaque y Jaque Mate.
     """
-    def __init__(self,colores: str, casillas=None):
+
+    def __init__(self, colores: str, casillas=None):
         """Constructor del tablero."""
         if casillas is None:
             casillas = dict()
@@ -24,7 +27,7 @@ class Tablero:
     def __iter__(self):
         """Regrese un iterador de las coordenadas sobre el mapa."""
         return iter(self.casillas.values())
-            
+
     def __getitem__(self, item: Union[int, HexCoord]) -> Optional[str]:
         """Busca la coordenada en un mapa y retorna el estado de una celda."""
         if type(item) is HexCoord:
@@ -49,7 +52,7 @@ class Tablero:
             return item in self.casillas.keys()
 
     @staticmethod
-    def generarConRadio(radio: int,colores:str) -> Tablero:
+    def generarConRadio(radio: int, colores: str) -> Tablero:
         """Genera un mapa de hexagonos de un cierto radio."""
         tablero = Tablero(colores)
         i = 0
@@ -66,56 +69,46 @@ class Tablero:
     @staticmethod
     def generarMcCooey(colores: str) -> Tablero:
         """Generar un mapa de hexagonos de una variante Dave McCooey."""
-        #coordenadas de cada una de las piezas de acuerdo a la variante de Dave McCooey
-        
+        # Coordenadas de cada una de las piezas de acuerdo a la variante de Dave McCooey
+
         McCooeyPos: dict[str, list[tuple]] = {
-                "b_peon": [(-n, -2, n + 2) for n in range(4)] + [(n, -n - 2, 2) for n in range(4)],
-                "b_caballo": [(-1, -3, 4), (1, -4, 3)],
-                "b_torre": [(-2, -3, 5), (2, -5, 3)],
-                "b_alfil": [(0, -3, 3), (0, -4, 4), (0, -5, 5)],
-                "b_reina": [(-1, -4, 5)],
-                "b_rey": [(1, -5, 4)]
+            "b_peon": [(-n, -2, n + 2) for n in range(4)] + [(n, -n - 2, 2) for n in range(4)],
+            "b_caballo": [(-1, -3, 4), (1, -4, 3)],
+            "b_torre": [(-2, -3, 5), (2, -5, 3)],
+            "b_alfil": [(0, -3, 3), (0, -4, 4), (0, -5, 5)],
+            "b_reina": [(-1, -4, 5)],
+            "b_rey": [(1, -5, 4)],
+
+            "n_peon": [(-n, 2+n, -2) for n in range(4)] + [(n, 2, -2-n) for n in range(4)],
+            "n_alfil": [(0, 5, -5), (0, 4, -4), (0, 3, -3)],
+            "n_reina": [(-1, 5, -4)],
+            "n_rey": [(1, 4, -5)],
+            "n_torre": [(-2, 5, -3), (2, 3, -5)],
+            "n_caballo": [(1, 3, -4), (-1, 4, -3)],
         }
 
         # Verifica si hay 3 jugadores.
         if colores.endswith("r"):
             # Realiza las posiciones de las piezas para 3 jugadores: blanco, negro y rojo
             McCooeyPos.update({
-                "n_peon": [(-2-n, 2, +n ) for n in range(4)] + [(-2, 2 +n , -n) for n in range(4)],
+                "n_peon": [(-2-n, 2, +n) for n in range(4)] + [(-2, 2 + n, -n) for n in range(4)],
                 "n_alfil": [(-5, 5, 0), (-4, 4, 0), (-3, 3, 0)],
                 "n_reina": [(-4, 5, -1)],
-                "n_rey": [( -5, 4, 1)],
-                "n_torre": [( -3, 5, -2), ( -5, 3, 2)],
+                "n_rey": [(-5, 4, 1)],
+                "n_torre": [(-3, 5, -2), (-5, 3, 2)],
                 "n_caballo": [(-4, 3, 1), (-3, 4, -1)],
-                
-                "r_peon": [( 2, +n,-2-n ) for n in range(4)] + [( 2 +n, -n, -2) for n in range(4)],
-                "r_alfil": [(5, 0, -5), ( 4, 0, -4), ( 3, 0, -3)],
-                "r_reina": [( 5, -1, -4)],
-                "r_rey": [(  4, 1, -5)],
-                "r_torre": [(  5, -2, -3), (  3, 2, -5)],
-                "r_caballo": [( 3, 1, -4), ( 4, -1, -3)],
-            })
-        else:
-            # Realiza las posiciones de las piezas para 2 jugadores: blanco y negro
-            McCooeyPos.update({
-                "b_peon": [(-n, -2, n + 2) for n in range(4)] + [(n, -n - 2, 2) for n in range(4)],
-                "b_caballo": [(-1, -3, 4), (1, -4, 3)],
-                "b_torre": [(-2, -3, 5), (2, -5, 3)],
-                "b_alfil": [(0, -3, 3), (0, -4, 4), (0, -5, 5)],
-                "b_reina": [(-1, -4, 5)],
-                "b_rey": [(1, -5, 4)],
 
-                "n_peon": [(-n, 2+n, -2 ) for n in range(4)] + [(n, 2 , -2-n) for n in range(4)],
-                "n_alfil": [(0,5,-5), (0, 4, -4), (0, 3, -3)],
-                "n_reina": [(-1, 5, -4)],
-                "n_rey": [( 1, 4, -5)],
-                "n_torre": [( -2, 5, -3), ( 2, 3, -5)],
-                "n_caballo": [(1, 3, -4), (-1, 4, -3)],
-                
+                "r_peon": [(2, +n, -2-n) for n in range(4)] + [(2 + n, -n, -2) for n in range(4)],
+                "r_alfil": [(5, 0, -5), (4, 0, -4), (3, 0, -3)],
+                "r_reina": [(5, -1, -4)],
+                "r_rey": [(4, 1, -5)],
+                "r_torre": [(5, -2, -3), (3, 2, -5)],
+                "r_caballo": [(3, 1, -4), (4, -1, -3)],
             })
+
         # Generar un mapa inicial.
-        mapaInicial: Tablero = Tablero.generarConRadio(5,colores)
-        
+        mapaInicial: Tablero = Tablero.generarConRadio(5, colores)
+
         for pieza, listaPosiciones in McCooeyPos.items():
             for posicion in listaPosiciones:
                 mapaInicial[HexCoord(*posicion)] = pieza
@@ -149,6 +142,59 @@ class Tablero:
                 if hexagonoActual not in self:
                     break
 
+                # Si las piezas son del mismo color no se puede mover a ese lugar.
+                if self[hexagonoActual] is not None and self[hexagonoActual][0] == coordPiezaInicial[0]:
+                    break
+
+                # Manejo especial para los movimientos de los peones.
+                if coordPiezaInicial.endswith("peon"):
+                    diferencia: HexCoord = hexagonoActual - posInicial
+                    # Si el peon es blanco:
+                    if coordPiezaInicial[0] == "b":
+                        # Si es un ataque diagonal pero no hay nadie a quien atacar:
+                        if diferencia in [HexCoord(-1, 1, 0), HexCoord(1, 0, -1)] and self[hexagonoActual] is None:
+                            break
+
+                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        if diferencia == HexCoord(0, 1, -1) and self[hexagonoActual] is not None:
+                            break
+
+                    # Si el peon es negro:
+                    elif coordPiezaInicial[0] == "n":
+
+                        # Si el modo de juego tiene 3 jugadores:
+                        if self.piezas.colores.endswith("r"):
+
+                            # Si es un ataque diagonal pero no hay nadie a quien atacar:
+                            if diferencia in [HexCoord(0, -1, 1), HexCoord(1, 0, -1)] and self[hexagonoActual] is None:
+                                break
+
+                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            if diferencia == HexCoord(1, -1, 0) and self[hexagonoActual] is not None:
+                                break
+
+                        # Si el modo de juego tiene 2 jugadores:
+                        else:
+
+                            # Si es un ataque diagonal pero no hay nadie a quien atacar:
+                            if diferencia in [HexCoord(1, -1, 0), HexCoord(-1, 0, 1)] and self[hexagonoActual] is None:
+                                break
+
+                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            if diferencia == HexCoord(0, -1, 1) and self[hexagonoActual] is not None:
+                                break
+
+                    # Si el peon es rojo:
+                    elif coordPiezaInicial[0] == "r":
+
+                        # Si es un ataque diagonal pero no hay nadie a quien atacar:
+                        if diferencia in [HexCoord(-1, 1, 0), HexCoord(0, -1, 1)] and self[hexagonoActual] is None:
+                            break
+
+                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        if diferencia == HexCoord(-1, 0, 1) and self[hexagonoActual] is not None:
+                            break
+
                 # Si el movimiento es valido, se agrega a la lista.
                 movimientosValidos.append(hexagonoActual)
 
@@ -156,9 +202,14 @@ class Tablero:
                 if self[hexagonoActual] is not None:
                     break
 
+                # El rey, el peón y el caballo solo pueden moverse a lo largo de sus vectores una vez.
+                # Se ejecutará en el primer ciclo de cualquier vector, deteniendo el comportamiento deslizante para ellos.
+                if coordPiezaInicial[2:] in ["rey", "peon", "caballo"]:
+                    break
+
         return movimientosValidos
 
-    def moverPieza(self, posInicial: HexCoord, posFinal: HexCoord,desde : str):
+    def moverPieza(self, posInicial: HexCoord, posFinal: HexCoord, desde: str):
         """Realiza el movimiento desde posicion inicial hasta la posicion final."""
         if posInicial == posFinal:
             return
