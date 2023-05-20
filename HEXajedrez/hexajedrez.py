@@ -2,6 +2,7 @@ import pygame
 from boton import Boton
 from imagen import Imagen
 from juego import Juego
+from tablero import Tablero
 
 pygame.init()
 
@@ -9,7 +10,7 @@ pygame.init()
 ANCHO_PANTALLA = 1100
 ALTO_PANTALLA = 700
 
-# Se define el tamaño de la pantalla
+# Se define el tamanio de la pantalla
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
 # Titulo de la pantalla
@@ -20,35 +21,35 @@ icono = Imagen("img/hex_icono.png")
 # Se dibuja el icono
 pygame.display.set_icon(icono.obtenerImagen())
 
-# Se define la tipografía
+# Se define la tipografia
 FUENTE = pygame.font.Font("fnt/8-Bit.TTF",30)
 # Se define el color de las letras
 BLANCO = (255, 255, 255)
 
-# Variables del menú
+# Variables del menu
 opcionesDeJuego = False
 pantallaDePausa = False
 pantallaDeOpciones = False
 pantallaAzul = False
 
 # Funciones
-def dibujaTexto(texto, tamaño, colorTexto, x, y):
+def dibujaTexto(texto, tamanio, colorTexto, x, y):
     """ Genenera un texto en pantalla con la FUENTE y color de texto elegidos en la 
-    posición "x" e "y" de la pantalla con el texto elegido. """
-    img = pygame.font.Font("fnt/8-Bit.TTF",tamaño).render(texto, True, colorTexto)
+    posicion "x" e "y" de la pantalla con el texto elegido. """
+    img = pygame.font.Font("fnt/8-Bit.TTF",tamanio).render(texto, True, colorTexto)
     pantalla.blit(img, (x, y))
 
-# Imágenes del Menu
+# Imagenes del Menu
 unoContraUnoImg = Imagen("img/boton_uno_contra_uno.png")
 unoContraDosImg = Imagen("img/boton_uno_contra_dos.png")
 unoContraCpuImg = Imagen("img/boton_uno_contra_cpu.png")
 unoContraDosCpuImg = Imagen("img/boton_uno_contra_dos_cpu.png")
 
-# Título menú
+# Titulo menu
 hexajedrezImg = Imagen("img/HEXajedrez.png")
 
 
-# Imágen de fondo
+# Imagen de fondo
 fondoRojoImg = Imagen('img/Fondo_Rojo.png')
 fondoAmarilloImg = Imagen('img/Fondo_Amarillo.png')
 fondoCelesteImg = Imagen('img/Fondo_Celeste.png')
@@ -72,7 +73,7 @@ botonVolver = Boton(0,395,FUENTE.render("Volver", True, BLANCO),1)
 botonVolverAzul = Boton(850,600,FUENTE.render("Volver", True, BLANCO),1)
 
 
-# Bucle de ejecución
+# Bucle de ejecucion
 ejecucion = True
 while ejecucion:
     # Pintar la pantalla de color blanco
@@ -82,7 +83,7 @@ while ejecucion:
     if pantallaDePausa == True:
         # se muestra el fondo celeste y se dibujan los botones
         pantalla.blit(fondoCelesteImg.redimensionar(ANCHO_PANTALLA, ALTO_PANTALLA), (0 ,0))
-        # se chequea que botón se presiona y se abre la ventana correspondiente
+        # se chequea que boton se presiona y se abre la ventana correspondiente
         if botonContinuar.dibujar(pantalla, "Centrado"):
             print("Continuar")
         if botonOpciones.dibujar(pantalla, "Centrado"):
@@ -94,7 +95,7 @@ while ejecucion:
         if botonCreditos.dibujar(pantalla, "Centrado"):
             print("Creditos") 
         if botonSalir.dibujar(pantalla, "Centrado"):
-            # Se abandona el bucle de ejecución y cierra el programa
+            # Se abandona el bucle de ejecucion y cierra el programa
             ejecucion = False
             print("Salir")  
         # PANTALLA DE OPCIONES
@@ -104,7 +105,7 @@ while ejecucion:
             if botonSonido.dibujar(pantalla, "Centrado"):
                 print("Sonido")
             if botonMusica.dibujar(pantalla, "Centrado"):
-                print("Música")
+                print("Musica")
             if botonDificultad.dibujar(pantalla, "Centrado"):
                 print("Dificultad")
             if botonVolver.dibujar(pantalla, "Centrado"):
@@ -124,7 +125,7 @@ while ejecucion:
             pantalla.blit(hexajedrezImg.obtenerImagen(), (100, 20))
             # Se dibujan los botones de los modos de juego y al presionarlos cambia la pantalla
             if botonUnoContraUno.dibujar(pantalla, "Centrado"):
-                Juego(ANCHO_PANTALLA).iniciar()
+                Juego(ANCHO_PANTALLA,"bn").iniciar()
             if botonUnoContraDos.dibujar(pantalla, "Centrado"):
                 pantallaAzul = True
                 print("inicia juego 1 contra 2")
@@ -154,10 +155,10 @@ while ejecucion:
             # Obtener las nuevas dimensiones de la pantalla
             ANCHO_PANTALLA, ALTO_PANTALLA = evento.w, evento.h
 
-            # Calcular la relación de aspecto actual
+            # Calcular la relacion de aspecto actual
             relacion_de_aspecto = ANCHO_PANTALLA / ALTO_PANTALLA
 
-            # Redimensionar la pantalla manteniendo la relación de aspecto
+            # Redimensionar la pantalla manteniendo la relacion de aspecto
             pantalla = pygame.display.set_mode((ANCHO_PANTALLA, int(ANCHO_PANTALLA / relacion_de_aspecto)), pygame.RESIZABLE)
 
             # Actualizar la pantalla

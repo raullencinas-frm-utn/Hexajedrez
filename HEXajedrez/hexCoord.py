@@ -1,15 +1,16 @@
-from __future__ import annotations  # Necesario para usar la clase como anotación de tipo en sus propios miembros.
+from __future__ import annotations  # Necesario para usar la clase como anotacion de tipo en sus propios miembros.
 import math
 
 class HexCoord:
     """
     Una clase contenedora sobre el concepto de una coordenada hexagonal.
-    La clase proporciona sobrecargas de operadores como +, -, * y /, así como == y !=.
-    La clase también proporciona sobrecargas de funciones nativas como round(), hash() y abs().
-    Esto permite una interfaz Pythonic con geometría hexagonal.
+    La clase proporciona sobrecargas de operadores como +, -, * y /, asi como == y !=.
+    La clase tambien proporciona sobrecargas de funciones nativas como round(), hash() y abs().
+    Esto permite una interfaz Pythonic con geometria hexagonal.
     """
 
     def __init__(self, p: float, q: float, r: float):
+        """Constructor de contenedor de coordenadas axiales/hexagonales."""
         self.p, self.q, self.r = p, q, r
 
     def __add__(self, other: HexCoord) -> HexCoord:
@@ -21,15 +22,15 @@ class HexCoord:
         return HexCoord(self.p - other.p, self.q - other.q, self.r - other.r)
 
     def __mul__(self, other: float) -> HexCoord:
-        """Multiplicación vectorial por una escalar"""
+        """Multiplicacion vectorial por una escalar"""
         return HexCoord(self.p * other, self.q * other, self.r * other)
 
     def __truediv__(self, other: float) -> HexCoord:
-        """División vectorial por una escalar."""
+        """Division vectorial por una escalar."""
         return HexCoord(self.p / other, self.q / other, self.r / other)
 
     def __eq__(self, other: HexCoord) -> bool:
-        """Comprobación de igualdad de componentes."""
+        """Comprobacion de igualdad de componentes."""
         if type(other) is not type(self):
             return False
 
@@ -57,21 +58,21 @@ class HexCoord:
         return HexCoord(rp, rq, rr)
 
     def __str__(self) -> str:
-        """Una representación fácil de usar."""
+        """Una representacion facil de usar."""
         return f"({self.p}, {self.q}, {self.r})"
 
     def __repr__(self):
-        """La representación de un codificador."""
+        """La representacion de un codificador."""
         return f"HexCoord({self.p}, {self.q}, {self.r})"
 
     def __hash__(self) -> int:
-        """Hashing único que tiene en cuenta el orden de los valores."""
+        """Hashing unico que tiene en cuenta el orden de los valores."""
         return hash((self.p, self.q, self.r))
 
     def __abs__(self) -> HexCoord:
         """
         Asigne cada coordenada a sus valores absolutos.
-        No se garantiza que sea una coordenada hexagonal válida geométricamente después.
+        No se garantiza que sea una coordenada hexagonal valida geometricamente despues.
         """
         return HexCoord(abs(self.p), abs(self.q), abs(self.r))
 
