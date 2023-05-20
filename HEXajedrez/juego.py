@@ -25,6 +25,8 @@ class Juego:
         AREA_JUEGO = self.AREA_JUEGO
         # Dimension adicional necesaria para la GUI.
         AREA_ESTADO = self.AREA_ESTADO
+        # Fuente de AREA_ESTADO
+        FUENTE = pygame.font.Font("fnt/8-Bit.TTF", 10)
         # Ancho y alto del juego.
         ANCHO_JUEGO, ALTO_JUEGO = AREA_JUEGO
         ANCHO_ESTADO = AREA_ESTADO[0]
@@ -56,6 +58,11 @@ class Juego:
         # Guarda los movimientos validos de la pieza tomada
         movimientosValidos: Optional[list[HexCoord]] = None
 
+        self.turnoJugador: int = 0  # Si la capa actual del juego es pareja o no.
+        estadoRey: str = ""  # Un mensaje sobre el estado de cualquiera de los reyes..
+        turno: str = ""  # Mensaje de qué lado es el turno.
+        
+
         def dibujaHex(coordenada: HexCoord, color: tuple, llenar=False):
             """Dibuja un hexagono en la pantalla."""
             pygame.draw.polygon(PANTALLA, color, ADAPTADOR.getVertices(
@@ -70,9 +77,28 @@ class Juego:
                     return
                 PANTALLA.blit(
                     imagenesDePiezas[casilla.estado], pixelCoords - AREA_PIEZA)
+                
+        def actualizaElTurno():
+            """Comprueba la capa y así determina de qué lado es el turno."""
+            print(self.turnoJugador)
+            self.turnoJugador = HEX_TABLERO.turno % len(self.piezas.colores)
+            if self.turnoJugador < 1:
+                self.turno = "Turno del Jugador Blanco"
+            else:
+                self.turno = "Turno del Jugador Negro" 
+            if HEX_TABLERO.elReyEstaEnJaque('b'):
+                    self.estadoRey = "¡Jaque al Rey Blanco!"
+            elif HEX_TABLERO.elReyEstaEnJaque('n'):
+                    self.estadoRey = "¡Jaque al Rey Negro!"
+            else:
+                self.estadoRey = ""
+                
+        def escribeTexto(texto: str, coordenadas: tuple[int, int, int]):
+            """Un método usado para escribir texto en la pantalla.."""
+            PANTALLA.blit(FUENTE.render(texto, True, (0, 0, 0)), coordenadas)
 
         juegoEjecutandose = True
-
+        actualizaElTurno()
         # Bucle del juego:
         while juegoEjecutandose:
             for evento in pygame.event.get():
@@ -116,7 +142,7 @@ class Juego:
                             HEX_TABLERO.moverPieza(
                                 coordPiezaInicial, coordSeleccion, "jugador")
                             piezaSeleccionada = coordPiezaInicial = None
-
+                            actualizaElTurno()
             # se pone la pantalla de color blanco
             PANTALLA.fill((255, 255, 255))
 
@@ -154,6 +180,10 @@ class Juego:
             # Se dibuja la linea que va a separar el tablero con la interfaz de turnos.
             pygame.draw.line(PANTALLA, (62, 48, 92),
                              (ANCHO_JUEGO, 0), (ANCHO_JUEGO, ALTO_JUEGO), 13)
+
+            escribeTexto(self.turno, (ANCHO_JUEGO+90, 613))
+            
+            escribeTexto(self.estadoRey, (ANCHO_JUEGO+90+len(self.estadoRey), 650))
 
             # Actualiza la pantalla.
             pygame.display.flip()

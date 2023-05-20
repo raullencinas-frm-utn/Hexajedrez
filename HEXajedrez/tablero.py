@@ -23,6 +23,7 @@ class Tablero:
         self.coordenadasACasillas: dict[HexCoord, int] = dict()
         self.piezas = Piezas(colores)
         self.movimientos = self.piezas.movimientos()
+        self.turno: int = 0
 
     def __iter__(self):
         """Regrese un iterador de las coordenadas sobre el mapa."""
@@ -145,6 +146,7 @@ class Tablero:
                 # Si las piezas son del mismo color no se puede mover a ese lugar.
                 if self[hexagonoActual] is not None and self[hexagonoActual][0] == coordPiezaInicial[0]:
                     break
+                
 
                 # Manejo especial para los movimientos de los peones.
                 if coordPiezaInicial.endswith("peon"):
@@ -206,12 +208,89 @@ class Tablero:
                 # Se ejecutará en el primer ciclo de cualquier vector, deteniendo el comportamiento deslizante para ellos.
                 if coordPiezaInicial[2:] in ["rey", "peon", "caballo"]:
                     break
-
+        
         return movimientosValidos
 
     def moverPieza(self, posInicial: HexCoord, posFinal: HexCoord, desde: str):
         """Realiza el movimiento desde posicion inicial hasta la posicion final."""
         if posInicial == posFinal:
             return
-        self[posFinal] = self[posInicial]
-        self[posInicial] = None
+        else:
+            self[posFinal] = self[posInicial]
+            self[posInicial] = None
+            if desde != "":
+                self.turno += 1
+        
+    def elReyEstaEnJaque(self, color: str) -> bool:
+        """Comprobar si un rey del color especificado está en jaque en este momento."""
+
+        # Debe encontrar la coordenada en la que se encuentra el rey, para verificar los movimientos enemigos.
+        coordRey: Optional[HexCoord] = None
+        for casilla in self:
+            if casilla.estado == f"{color}_rey":
+                coordRey = casilla.coordenada
+
+        # Iterar sobre el diccionario de celdas, sobre los valores del par de claves.
+        for coord, casilla in self.casillas.items():
+
+            # Si no hay nada en esa casilla, no hay necesidad de comprobar si puede amenazar al rey.
+            if casilla.estado is None:
+                continue
+
+            # Si la pieza es del mismo color que el rey, es seguro que no lo amenaza.
+            if casilla.estado[0] == color:
+                continue
+
+            # Esta pieza debe ser ahora sin duda una pieza enemiga, así que itera sobre sus "movimientos":
+            for orientacion in self.movimientos[casilla.estado]:
+                # Convierta la tupla de 3 en un `HexCoord` para aprovechar sus operadores y métodos sobrecargados.
+                orientacion: HexCoord = HexCoord(*orientacion)
+                hexagonoActual: HexCoord = casilla.coordenada
+
+                while True:
+
+                    # Recorre sobre la linea en dreccion a la orientación.
+                    hexagonoActual += orientacion
+
+                    # ¿La coordenada en la que estoy está fuera de los límites? Si es así, deja de moverte a lo largo de esta línea.
+                    if hexagonoActual not in self:
+                        break
+
+                    # Si la pieza en la coordenada es del mismo color que yo, deja de moverte a lo largo de esta línea.
+                    if self[hexagonoActual] is not None and self[hexagonoActual][0] == casilla.estado[0]:
+                        break
+
+                    # Manejo especial de las peculiaridades de las piezas de peon
+                    if casilla.estado.endswith("peon"):
+                        offset: HexCoord = hexagonoActual - casilla.coordenada
+
+                        # Comprobar que el desplazamiento es un ataque, ya que los peones no pueden amenazar a los que se encuentran adelante.
+                        if casilla.estado[0] == "b":
+                            if offset not in [HexCoord(-1, 1, 0), HexCoord(1, 0, -1)]:
+                                break
+                        elif casilla.estado[0] == "n":
+                            if self.piezas.colores.endswith("r"):
+                                if offset not in (HexCoord(0, -1, 1), HexCoord(1, 0, -1)):
+                                    break
+                            else:
+                                if offset not in (HexCoord(1, -1, 0), HexCoord(-1, 0, 1)):
+                                    break
+                        elif casilla.estado[0] == "r":
+                            if offset not in (HexCoord(-1, 1, 0), HexCoord(0, -1, 1)):
+                                break
+
+                    # La jugada paso todos los jaques, asi que si amenaza al rey, el rey esta en jaque.
+                    if hexagonoActual == coordRey:
+                        return True
+
+                    # Si esto es cierto, debe ser el caso de que es una pieza enemiga distinta del rey, por lo que no se puede recorrer a lo largo de este vector.
+                    elif self[hexagonoActual] is not None:
+                        break
+
+                    #Rey, Peón y Caballo sólo pueden moverse a lo largo de sus movimientos una vez: no son piezas deslizantes.
+                    #se ejecutará en el primer ciclo de cualquier vector, deteniendo el movimientto para ellos.
+                    elif casilla.estado[2:] in ["rey", "peon", "caballo"]:
+                        break
+
+        # El rey no está en jaque.
+        return False
