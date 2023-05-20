@@ -6,7 +6,8 @@ class Boton:
         """Constructor de un boton."""
         ancho = imagen.get_width()
         alto = imagen.get_height()
-        self.imagen = pygame.transform.scale(imagen, (int(ancho * escala), int(alto * escala)))
+        self.imagen = pygame.transform.scale(
+            imagen, (int(ancho * escala), int(alto * escala)))
         self.rectangulo = self.imagen.get_rect()
         self.rectangulo.topleft = (x, y)
         self.seleccionado = False
@@ -29,10 +30,10 @@ class Boton:
 
         # Dibujar boton en pantalla
         if posicion == "Centrado":
-            anchoPantalla,altoPantalla = pygame.display.get_window_size()
-            self.rectangulo.x = (anchoPantalla / 2) - (self.imagen.get_width() / 2) 
-        
-        
+            anchoPantalla, altoPantalla = pygame.display.get_window_size()
+            self.rectangulo.x = (anchoPantalla / 2) - \
+                (self.imagen.get_width() / 2)
+
         pantalla.blit(self.imagen, (self.rectangulo.x, self.rectangulo.y))
 
         return accion
