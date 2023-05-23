@@ -60,7 +60,7 @@ class Juego:
 
         self.turnoJugador: int = 0  # Si la capa actual del juego es pareja o no.
         estadoRey: str = ""  # Un mensaje sobre el estado de cualquiera de los reyes..
-        turno: str = ""  # Mensaje de qué lado es el turno.
+        turnoTexto: str = ""  # Mensaje de qué lado es el turno.
         
 
         def dibujaHex(coordenada: HexCoord, color: tuple, llenar=False):
@@ -69,7 +69,7 @@ class Juego:
                 coordenada), 0 if llenar else 3)
 
         def dibujarPiezas(casilla: HexCasilla):
-            """Dibuja una pieza en pantalla segun la casilla ingresada."""
+            """Dibuja una pieza en pantalla segun la celd ingresada."""
             pixelCoords: PixelCoord = ADAPTADOR.hexAPixel(casilla.coordenada)
 
             if casilla.estado is not None:
@@ -79,22 +79,36 @@ class Juego:
                     imagenesDePiezas[casilla.estado], pixelCoords - AREA_PIEZA)
                 
         def actualizaElTurno():
-            """Comprueba la capa y así determina de qué lado es el turno."""
+            """Comprueba las jugadas realizadas y así determina de qué lado es el turno."""
             print(self.turnoJugador)
             self.turnoJugador = HEX_TABLERO.turno % len(self.piezas.colores)
             if self.turnoJugador < 1:
-                self.turno = "Turno del Jugador Blanco"
+                self.turnoTexto = "Turno del Jugador Blanco"
+            elif self.turnoJugador == 1:
+                self.turnoTexto = "Turno del Jugador Negro" 
             else:
-                self.turno = "Turno del Jugador Negro" 
+                self.turnoTexto ="Turno del Jugador Rojo" 
+                
             if HEX_TABLERO.elReyEstaEnJaque('b'):
-                    self.estadoRey = "¡Jaque al Rey Blanco!"
+                if HEX_TABLERO.elReyEstaEnJaqueMate('b'):
+                    self.estadoRey = "Jaque Mate al Rey Blanco"
+                else:
+                    self.estadoRey = "Jaque al Rey Blanco"
             elif HEX_TABLERO.elReyEstaEnJaque('n'):
-                    self.estadoRey = "¡Jaque al Rey Negro!"
+                if HEX_TABLERO.elReyEstaEnJaqueMate('n'):
+                    self.estadoRey = "Jaque Mate al Rey Negro"
+                else:
+                    self.estadoRey = "Jaque al Rey Negro"
+            elif HEX_TABLERO.elReyEstaEnJaque('r'):
+                if HEX_TABLERO.elReyEstaEnJaqueMate('r'):
+                    self.estadoRey = "Jaque Mate al Rey Rojo"
+                else:
+                    self.estadoRey = "Jaque al Rey Rojo"
             else:
                 self.estadoRey = ""
                 
         def escribeTexto(texto: str, coordenadas: tuple[int, int, int]):
-            """Un método usado para escribir texto en la pantalla.."""
+            """Un método usado para escribir texto en la pantalla."""
             PANTALLA.blit(FUENTE.render(texto, True, (0, 0, 0)), coordenadas)
 
         juegoEjecutandose = True
@@ -131,6 +145,10 @@ class Juego:
                         # Obtener el color de la pieza seleccionada.
                         color: str = piezaEnHexagono[0]
 
+                        # Verificar los turnos.
+                        if not ((self.turnoJugador==0 and color == "b") or (self.turnoJugador==1 and color == "n") or (self.turnoJugador==2 and color == "r")):
+                            continue
+
                         piezaSeleccionada = piezaEnHexagono
                         coordPiezaInicial = coordSeleccion
                         movimientosValidos = HEX_TABLERO.generarMovimientos(
@@ -158,7 +176,7 @@ class Juego:
                     casilla.coordenada.q - casilla.coordenada.r) % 3]
                 dibujaHex(casilla.coordenada, color, llenar=True)
 
-            # Draw the valid moves for the current piece. Green = move, red = capture, blue = starting hex.
+            # Dibuja los colores segun el estado del movimiento. Verde: movimientos posibles, Rojo: capturar piezas, Azul: celda actual.
             if coordPiezaInicial is not None:
                 for coord in movimientosValidos:
                     color: tuple[int, int, int] = (
@@ -181,7 +199,7 @@ class Juego:
             pygame.draw.line(PANTALLA, (62, 48, 92),
                              (ANCHO_JUEGO, 0), (ANCHO_JUEGO, ALTO_JUEGO), 13)
 
-            escribeTexto(self.turno, (ANCHO_JUEGO+90, 613))
+            escribeTexto(self.turnoTexto, (ANCHO_JUEGO+90, 613))
             
             escribeTexto(self.estadoRey, (ANCHO_JUEGO+90+len(self.estadoRey), 650))
 
