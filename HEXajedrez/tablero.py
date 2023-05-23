@@ -26,7 +26,7 @@ class Tablero:
         self.turno: int = 0
 
     def __iter__(self):
-        """Regrese un iterador de las coordenadas sobre el mapa."""
+        """Regresa un iterador de las coordenadas sobre el mapa."""
         return iter(self.casillas.values())
 
     def __getitem__(self, item: Union[int, HexCoord]) -> Optional[str]:
@@ -44,9 +44,7 @@ class Tablero:
             self.casillas[clave].estado = valor
 
     def __contains__(self, item: HexCoord) -> bool:
-        """
-        Verifica que la coordenada se encuentra en el mapa.
-        """
+        """Verifica que la coordenada se encuentra en el mapa."""
         if type(item) is HexCoord:
             return item in self.coordenadasACasillas.keys()
         elif type(item) is int:
@@ -147,7 +145,15 @@ class Tablero:
                 if self[hexagonoActual] is not None and self[hexagonoActual][0] == coordPiezaInicial[0]:
                     break
                 
-
+                # Si el rey se encuentra en jaque tras este movimiento:
+                if self.jaqueAlMoverse(coordPiezaInicial[0], posInicial, hexagonoActual):
+                    # El peon, el caballo, y el rey solo pueden moverse una celda a la vez.
+                    if coordPiezaInicial[2:] in ["rey", "peon", "caballo"]:
+                        break
+                    # El resto de piezas se mueven hasta los extremos del tablero.
+                    else:
+                        continue
+                    
                 # Manejo especial para los movimientos de los peones.
                 if coordPiezaInicial.endswith("peon"):
                     diferencia: HexCoord = hexagonoActual - posInicial
@@ -156,10 +162,22 @@ class Tablero:
                         # Si es un ataque diagonal pero no hay nadie a quien atacar:
                         if diferencia in [HexCoord(-1, 1, 0), HexCoord(1, 0, -1)] and self[hexagonoActual] is None:
                             break
+                        
+                        if diferencia in [HexCoord(-1, 1, 0), HexCoord(1, 0, -1)] and self[hexagonoActual] is not None:
+                            movimientosValidos.append(hexagonoActual)
+                            break
 
-                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        if self[hexagonoActual] is not None:
+                            break
+                       
                         if diferencia == HexCoord(0, 1, -1) and self[hexagonoActual] is not None:
                             break
+                        
+                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        if diferencia == HexCoord(0, 1, -1) and self[hexagonoActual] is None:
+                            if (posInicial.p, posInicial.q, posInicial.r) in ([(-n, -2, n + 2) for n in range(4)] + [(n, -n - 2, 2) for n in range(4)]) and self[hexagonoActual] is None:
+                                movimientosValidos.append(hexagonoActual)
+                                continue
 
                     # Si el peon es negro:
                     elif coordPiezaInicial[0] == "n":
@@ -170,10 +188,21 @@ class Tablero:
                             # Si es un ataque diagonal pero no hay nadie a quien atacar:
                             if diferencia in [HexCoord(0, -1, 1), HexCoord(1, 0, -1)] and self[hexagonoActual] is None:
                                 break
+                            
+                            if diferencia in [HexCoord(0, -1, 1), HexCoord(1, 0, -1)] and self[hexagonoActual] is not None:
+                                movimientosValidos.append(hexagonoActual)
+                                break
+                            
+                            if self[hexagonoActual] is not None:
+                                    break
 
-                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
                             if diferencia == HexCoord(1, -1, 0) and self[hexagonoActual] is not None:
                                 break
+                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            if diferencia == HexCoord(1, -1, 0) and self[hexagonoActual] is None:
+                                if (posInicial.p, posInicial.q, posInicial.r) in ([(-2-n, 2, +n ) for n in range(4)] + [(-2, 2 +n , -n) for n in range(4)]):
+                                    movimientosValidos.append(hexagonoActual)
+                                    continue
 
                         # Si el modo de juego tiene 2 jugadores:
                         else:
@@ -181,21 +210,46 @@ class Tablero:
                             # Si es un ataque diagonal pero no hay nadie a quien atacar:
                             if diferencia in [HexCoord(1, -1, 0), HexCoord(-1, 0, 1)] and self[hexagonoActual] is None:
                                 break
-
+                            
+                            if diferencia in [HexCoord(1, -1, 0), HexCoord(-1, 0, 1)] and self[hexagonoActual] is not None:
+                                movimientosValidos.append(hexagonoActual)
+                                break
+                            
+                            if self[hexagonoActual] is not None:
+                                    break
+                                
                             # Si es un movimiento hacia delante pero hay una pieza en el camino:
                             if diferencia == HexCoord(0, -1, 1) and self[hexagonoActual] is not None:
                                 break
-
+                            
+                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            if diferencia == HexCoord(0, -1, 1) and self[hexagonoActual] is None:
+                                
+                                if (posInicial.p, posInicial.q, posInicial.r) in ([(-n, 2+n, -2 ) for n in range(4)] + [(n, 2 , -2-n) for n in range(4)]):
+                                    movimientosValidos.append(hexagonoActual)
+                                    continue
+                
                     # Si el peon es rojo:
                     elif coordPiezaInicial[0] == "r":
 
                         # Si es un ataque diagonal pero no hay nadie a quien atacar:
                         if diferencia in [HexCoord(-1, 1, 0), HexCoord(0, -1, 1)] and self[hexagonoActual] is None:
                             break
-
-                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
-                        if diferencia == HexCoord(-1, 0, 1) and self[hexagonoActual] is not None:
+                        
+                        if diferencia in [HexCoord(-1, 1, 0), HexCoord(0, -1, 1)] and self[hexagonoActual] is not None:
+                            movimientosValidos.append(hexagonoActual)
                             break
+
+                        if self[hexagonoActual] is not None:
+                                    break
+                        
+                        if diferencia == HexCoord(-1, 0, 1) and self[hexagonoActual] is not None:
+                                    break
+                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        if diferencia == HexCoord(-1, 0, 1) and self[hexagonoActual] is None:
+                            if (posInicial.p, posInicial.q, posInicial.r) in ([( 2, +n,-2-n ) for n in range(4)] + [( 2 +n, -n, -2) for n in range(4)]):
+                                movimientosValidos.append(hexagonoActual)
+                                continue
 
                 # Si el movimiento es valido, se agrega a la lista.
                 movimientosValidos.append(hexagonoActual)
@@ -205,11 +259,25 @@ class Tablero:
                     break
 
                 # El rey, el peón y el caballo solo pueden moverse a lo largo de sus vectores una vez.
-                # Se ejecutará en el primer ciclo de cualquier vector, deteniendo el comportamiento deslizante para ellos.
                 if coordPiezaInicial[2:] in ["rey", "peon", "caballo"]:
                     break
         
         return movimientosValidos
+    
+    def casillasPiezasMismoColor(self, color: str) -> list[HexCasilla]:
+        """Devuelve todas las casillas que tengan una pieza de un color especifico."""
+        celdasValidas: list[HexCasilla] = []
+        for casilla in self:
+            if casilla.estado is not None and casilla.estado.startswith(color):
+                celdasValidas.append(casilla)
+        return celdasValidas
+
+    def movimientosPorColor(self, color: str) -> tuple[HexCoord, HexCoord]:
+        """Devuelve todos los movimientos de las piezas de un color especifico."""
+        for casilla in self.casillasPiezasMismoColor(color):
+            for coordenada in self.generarMovimientos(casilla.coordenada):
+                if casilla.coordenada != coordenada:
+                    yield casilla.coordenada, coordenada
 
     def moverPieza(self, posInicial: HexCoord, posFinal: HexCoord, desde: str):
         """Realiza el movimiento desde posicion inicial hasta la posicion final."""
@@ -220,18 +288,40 @@ class Tablero:
             self[posInicial] = None
             if desde != "":
                 self.turno += 1
-        
+                piezaMovida = self.__getitem__(posFinal)
+
+                # Si la pieza movida es un peon:
+                if piezaMovida[2:] == "peon":
+                    # Si el peon es blanco:
+                    if (piezaMovida[0] == "b"):
+                        if ((posFinal.q) == 5 or (posFinal.r) == -5):
+                            self.__setitem__(posFinal, "b_reina")
+                    # Si el peon es negro:
+                    elif (piezaMovida[0] == "n"):
+                        # Si hay 3 jugadores:
+                        if (self.piezas.colores.endswith("r")):
+                            if ((posFinal.p) == 5 or (posFinal.q) == -5):
+                                self.__setitem__(posFinal, "n_reina")
+                        # Si hay 2 jugadores:
+                        else:
+                            if ((posFinal.q) == -5 or (posFinal.r) == 5):
+                                self.__setitem__(posFinal, "n_reina")
+                    # Si el peon es rojo:
+                    else:
+                        if ((posFinal.p) == -5 or (posFinal.q) == 5):
+                            self.__setitem__(posFinal, "r_reina")
+            
     def elReyEstaEnJaque(self, color: str) -> bool:
         """Comprobar si un rey del color especificado está en jaque en este momento."""
 
         # Debe encontrar la coordenada en la que se encuentra el rey, para verificar los movimientos enemigos.
-        coordRey: Optional[HexCoord] = None
+        coordenadaRey: Optional[HexCoord] = None
         for casilla in self:
             if casilla.estado == f"{color}_rey":
-                coordRey = casilla.coordenada
+                coordenadaRey = casilla.coordenada
 
         # Iterar sobre el diccionario de celdas, sobre los valores del par de claves.
-        for coord, casilla in self.casillas.items():
+        for coordenada, casilla in self.casillas.items():
 
             # Si no hay nada en esa casilla, no hay necesidad de comprobar si puede amenazar al rey.
             if casilla.estado is None:
@@ -249,14 +339,14 @@ class Tablero:
 
                 while True:
 
-                    # Recorre sobre la linea en dreccion a la orientación.
+                    # Recorre sobre la linea en direccion a la orientación.
                     hexagonoActual += orientacion
 
-                    # ¿La coordenada en la que estoy está fuera de los límites? Si es así, deja de moverte a lo largo de esta línea.
+                    # Si la coordenada en la que se encuentra está fuera de los límites se deja de moverse a lo largo de esa línea.
                     if hexagonoActual not in self:
                         break
 
-                    # Si la pieza en la coordenada es del mismo color que yo, deja de moverte a lo largo de esta línea.
+                    # Si la pieza en la coordenada es del mismo color que la indicada, deja de moverse a lo largo de esta línea.
                     if self[hexagonoActual] is not None and self[hexagonoActual][0] == casilla.estado[0]:
                         break
 
@@ -280,17 +370,37 @@ class Tablero:
                                 break
 
                     # La jugada paso todos los jaques, asi que si amenaza al rey, el rey esta en jaque.
-                    if hexagonoActual == coordRey:
+                    if hexagonoActual == coordenadaRey:
                         return True
 
                     # Si esto es cierto, debe ser el caso de que es una pieza enemiga distinta del rey, por lo que no se puede recorrer a lo largo de este vector.
                     elif self[hexagonoActual] is not None:
                         break
 
-                    #Rey, Peón y Caballo sólo pueden moverse a lo largo de sus movimientos una vez: no son piezas deslizantes.
-                    #se ejecutará en el primer ciclo de cualquier vector, deteniendo el movimientto para ellos.
+                    #Rey, Peón y Caballo sólo pueden moverse a lo largo de sus movimientos una vez.
+                    #Se ejecutará en el primer ciclo de cualquier vector, deteniendo el movimientto para ellos.
                     elif casilla.estado[2:] in ["rey", "peon", "caballo"]:
                         break
 
         # El rey no está en jaque.
         return False
+    
+    def elReyEstaEnJaqueMate(self, color: str) -> bool:
+        """Revisa si un rey del color especificado se encuentra en situacion de Jaque Mate."""
+        # Si el rey se encuentra en Jaque:
+        if self.elReyEstaEnJaque(color):
+            # Si ninguna pieza puede moverse significa que se encuentra en Jaque Mate:
+            if all(len(self.generarMovimientos(celda.coordenada)) == 1 for celda in self.casillasPiezasMismoColor(color)):
+                return True
+        return False
+
+    def jaqueAlMoverse(self, color: str, posInicial: HexCoord, posFinal: HexCoord) -> bool:
+        """Revisa si el rey de un especifico color se encuentra en Jaque tras un movimiento."""
+        respaldo: Optional[str] = self[posFinal]
+
+        self.moverPieza(posInicial, posFinal,"")
+        estadoDeJaque: bool = self.elReyEstaEnJaque(color)
+        self.moverPieza(posFinal, posInicial,"")
+
+        self[posFinal] = respaldo
+        return estadoDeJaque
