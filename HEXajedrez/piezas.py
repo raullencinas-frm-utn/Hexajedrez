@@ -3,7 +3,7 @@ import pygame
 
 class Piezas:
 
-    nombres = ("peon", "torre", "caballo", "alfil", "rey", "reina")
+    nombres = ("peon", "torre", "caballo", "alfil", "rey", "dama")
 
     def __init__(self, colores: str):
         """Constructor de una pieza."""
@@ -43,7 +43,7 @@ class Piezas:
                 (-1, -1, 2), (1, 1, -2)
             ]),
 
-            **dict.fromkeys([f"{color}_reina" for color in self.colores], [
+            **dict.fromkeys([f"{color}_dama" for color in self.colores], [
                 (0, 1, -1), (0, -1, 1),
                 (1, 0, -1), (-1, 0, 1),
                 (1, -1, 0), (-1, 1, 0),

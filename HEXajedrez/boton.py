@@ -12,7 +12,7 @@ class Boton:
         self.rectangulo.topleft = (x, y)
         self.seleccionado = False
 
-    def dibujar(self, pantalla, posicion):
+    def dibujar(self, posicion):
         """Dibujar el boton en pantalla."""
         accion = False
         # obtenemos posicion de mouse
@@ -33,7 +33,7 @@ class Boton:
             anchoPantalla, altoPantalla = pygame.display.get_window_size()
             self.rectangulo.x = (anchoPantalla / 2) - \
                 (self.imagen.get_width() / 2)
-
-        pantalla.blit(self.imagen, (self.rectangulo.x, self.rectangulo.y))
+        
+        pygame.display.get_surface().blit(self.imagen, (self.rectangulo.x, self.rectangulo.y))
 
         return accion
