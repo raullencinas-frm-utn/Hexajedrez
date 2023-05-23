@@ -70,14 +70,15 @@ class Juego:
         desplazamientoArribaImg = Imagen("img/boton_Arriba.png")
         desplazamientoAbajoImg = Imagen("img/boton_Abajo.png")
 
-        botonDesplazamientoArriba = Boton(1060, 5, desplazamientoArribaImg.obtenerImagen(), .05)
-        botonDesplazamientoAbajo = Boton(1060, 600, desplazamientoAbajoImg.obtenerImagen(), .05)
+        botonDesplazamientoArriba = Boton(1030, 125, desplazamientoArribaImg.obtenerImagen(), .75)
+        botonDesplazamientoAbajo = Boton(1030, 650, desplazamientoAbajoImg.obtenerImagen(), .75)
 
         @staticmethod
         def actualizarRegistro(movimiento, registro) -> bool:
+            """Se actualiza el historial de movimientos con el movimiento que se pasa como parametro."""
             if movimiento != None:
                 registro.append(movimiento)
-            return len(registro) > 13
+            return len(registro) > 15
 
         def dibujaHex(coordenada: HexCoord, color: tuple, llenar=False):
             """Dibuja un hexagono en la pantalla."""
@@ -177,7 +178,7 @@ class Juego:
                         if coordSeleccion in movimientosValidos:
                             nuevoMov = HEX_TABLERO.moverPieza(
                                 coordPiezaInicial, coordSeleccion, "jugador")
-                            if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 13
+                            if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
                             
                             piezaSeleccionada = coordPiezaInicial = None
                             actualizaElTurno()
@@ -217,17 +218,17 @@ class Juego:
 
             # Se dibuja la linea que va a separar el tablero con la interfaz de turnos.
             pygame.draw.line(PANTALLA, (62, 48, 92),
-                             (ANCHO_JUEGO, 0), (ANCHO_JUEGO, ALTO_JUEGO), 13)
+                             (ANCHO_JUEGO, 0), (ANCHO_JUEGO, ALTO_JUEGO), 15)
 
             # Dibuja los movimientos guardados en el registro
-            for i in range(13):
+            for i in range(15):
                 if 0 <= (i + desplazamientoRegistro) < len(registroMovimientos):
                     escribeTexto(registroMovimientos[i + desplazamientoRegistro], 15 , (ANCHO_JUEGO + 30) , (145 + i * 35), (255,255,255))
 
             if botonDesplazamientoArriba.dibujar(""):
                 if desplazamientoRegistro > 0: 
                             desplazamientoRegistro -= 1
-            elif botonDesplazamientoAbajo.dibujar(""):
+            if botonDesplazamientoAbajo.dibujar(""):
                 desplazamientoRegistro += 1
 
             # Describe de quien es el turno:

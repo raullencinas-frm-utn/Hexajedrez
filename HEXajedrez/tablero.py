@@ -171,17 +171,11 @@ class Tablero:
                         if diferencia in [HexCoord(-1, 1, 0), HexCoord(1, 0, -1)] and self[hexagonoActual] is None:
                             break
                         
-                        if diferencia in [HexCoord(-1, 1, 0), HexCoord(1, 0, -1)] and self[hexagonoActual] is not None:
-                            movimientosValidos.append(hexagonoActual)
-                            break
-
-                        if self[hexagonoActual] is not None:
-                            break
-                       
-                        if diferencia == HexCoord(0, 1, -1) and self[hexagonoActual] is not None:
+                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        if diferencia in [HexCoord(0, 1, -1), HexCoord(0, 2, -2)] and self[hexagonoActual] is not None:
                             break
                         
-                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        # Si se encuentra en la posicion inicial de un peon, se permite mover una celda adicional:
                         if diferencia == HexCoord(0, 1, -1) and self[hexagonoActual] is None:
                             if (posInicial.p, posInicial.q, posInicial.r) in ([(-n, -2, n + 2) for n in range(4)] + [(n, -n - 2, 2) for n in range(4)]) and self[hexagonoActual] is None:
                                 movimientosValidos.append(hexagonoActual)
@@ -197,16 +191,11 @@ class Tablero:
                             if diferencia in [HexCoord(0, -1, 1), HexCoord(1, 0, -1)] and self[hexagonoActual] is None:
                                 break
                             
-                            if diferencia in [HexCoord(0, -1, 1), HexCoord(1, 0, -1)] and self[hexagonoActual] is not None:
-                                movimientosValidos.append(hexagonoActual)
+                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            if diferencia in [HexCoord(1, -1, 0), HexCoord(2, -2, 0)] and self[hexagonoActual] is not None:
                                 break
                             
-                            if self[hexagonoActual] is not None:
-                                    break
-
-                            if diferencia == HexCoord(1, -1, 0) and self[hexagonoActual] is not None:
-                                break
-                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            # Si se encuentra en la posicion inicial de un peon, se permite mover una celda adicional:
                             if diferencia == HexCoord(1, -1, 0) and self[hexagonoActual] is None:
                                 if (posInicial.p, posInicial.q, posInicial.r) in ([(-2-n, 2, +n ) for n in range(4)] + [(-2, 2 +n , -n) for n in range(4)]):
                                     movimientosValidos.append(hexagonoActual)
@@ -218,21 +207,13 @@ class Tablero:
                             # Si es un ataque diagonal pero no hay nadie a quien atacar:
                             if diferencia in [HexCoord(1, -1, 0), HexCoord(-1, 0, 1)] and self[hexagonoActual] is None:
                                 break
-                            
-                            if diferencia in [HexCoord(1, -1, 0), HexCoord(-1, 0, 1)] and self[hexagonoActual] is not None:
-                                movimientosValidos.append(hexagonoActual)
-                                break
-                            
-                            if self[hexagonoActual] is not None:
-                                    break
                                 
                             # Si es un movimiento hacia delante pero hay una pieza en el camino:
-                            if diferencia == HexCoord(0, -1, 1) and self[hexagonoActual] is not None:
+                            if diferencia in [HexCoord(0, -1, 1), HexCoord(0, -2, 2)] and self[hexagonoActual] is not None:
                                 break
                             
-                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            # Si se encuentra en la posicion inicial de un peon, se permite mover una celda adicional:
                             if diferencia == HexCoord(0, -1, 1) and self[hexagonoActual] is None:
-                                
                                 if (posInicial.p, posInicial.q, posInicial.r) in ([(-n, 2+n, -2 ) for n in range(4)] + [(n, 2 , -2-n) for n in range(4)]):
                                     movimientosValidos.append(hexagonoActual)
                                     continue
@@ -244,16 +225,11 @@ class Tablero:
                         if diferencia in [HexCoord(-1, 1, 0), HexCoord(0, -1, 1)] and self[hexagonoActual] is None:
                             break
                         
-                        if diferencia in [HexCoord(-1, 1, 0), HexCoord(0, -1, 1)] and self[hexagonoActual] is not None:
-                            movimientosValidos.append(hexagonoActual)
-                            break
-
-                        if self[hexagonoActual] is not None:
+                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        if diferencia in [HexCoord(-1, 0, 1), HexCoord(-2, 0, 2)] and self[hexagonoActual] is not None:
                                     break
                         
-                        if diferencia == HexCoord(-1, 0, 1) and self[hexagonoActual] is not None:
-                                    break
-                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        # Si se encuentra en la posicion inicial de un peon, se permite mover una celda adicional:
                         if diferencia == HexCoord(-1, 0, 1) and self[hexagonoActual] is None:
                             if (posInicial.p, posInicial.q, posInicial.r) in ([( 2, +n,-2-n ) for n in range(4)] + [( 2 +n, -n, -2) for n in range(4)]):
                                 movimientosValidos.append(hexagonoActual)
