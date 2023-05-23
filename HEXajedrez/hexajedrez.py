@@ -89,17 +89,17 @@ while ejecucion:
         pantalla.blit(fondoCelesteImg.redimensionar(
             ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
         # se chequea que boton se presiona y se abre la ventana correspondiente
-        if botonContinuar.dibujar(pantalla, "Centrado"):
+        if botonContinuar.dibujar("Centrado"):
             print("Continuar")
-        if botonOpciones.dibujar(pantalla, "Centrado"):
+        if botonOpciones.dibujar("Centrado"):
             # Abre la pantalla de opciones
             pantallaDeOpciones = True
             print("Opciones")
-        if botonComoJugar.dibujar(pantalla, "Centrado"):
+        if botonComoJugar.dibujar("Centrado"):
             print("Como Jugar")
-        if botonCreditos.dibujar(pantalla, "Centrado"):
+        if botonCreditos.dibujar("Centrado"):
             print("Creditos")
-        if botonSalir.dibujar(pantalla, "Centrado"):
+        if botonSalir.dibujar("Centrado"):
             # Se abandona el bucle de ejecucion y cierra el programa
             ejecucion = False
             print("Salir")
@@ -108,13 +108,13 @@ while ejecucion:
             # se muestra el fondo verde con los botones de opciones
             pantalla.blit(fondoVerdeImg.redimensionar(
                 ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
-            if botonSonido.dibujar(pantalla, "Centrado"):
+            if botonSonido.dibujar("Centrado"):
                 print("Sonido")
-            if botonMusica.dibujar(pantalla, "Centrado"):
+            if botonMusica.dibujar("Centrado"):
                 print("Musica")
-            if botonDificultad.dibujar(pantalla, "Centrado"):
+            if botonDificultad.dibujar("Centrado"):
                 print("Dificultad")
-            if botonVolver.dibujar(pantalla, "Centrado"):
+            if botonVolver.dibujar("Centrado"):
                 # Se abandona la pantalla de opciones
                 pantallaDeOpciones = False
     # PANTALLA DE MODOS DE JUEGO
@@ -123,7 +123,7 @@ while ejecucion:
         if pantallaAzul == True:
             pantalla.blit(pantallaAzulImg.redimensionar(
                 ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
-            if botonVolverAzul.dibujar(pantalla, ""):
+            if botonVolverAzul.dibujar(""):
                 pantallaAzul = False
         else:
             # Se dibuja el fondo amarillo
@@ -132,15 +132,15 @@ while ejecucion:
             # Se muestra el titulo
             pantalla.blit(hexajedrezImg.obtenerImagen(), (100, 20))
             # Se dibujan los botones de los modos de juego y al presionarlos cambia la pantalla
-            if botonUnoContraUno.dibujar(pantalla, "Centrado"):
+            if botonUnoContraUno.dibujar("Centrado"):
                 Juego(ANCHO_PANTALLA, "bn").iniciar()
-            if botonUnoContraDos.dibujar(pantalla, "Centrado"):
+            if botonUnoContraDos.dibujar("Centrado"):
                 pantallaAzul = True
                 print("inicia juego 1 contra 2")
-            if botonUnoContraCpu.dibujar(pantalla, "Centrado"):
+            if botonUnoContraCpu.dibujar("Centrado"):
                 pantallaAzul = True
                 print("inicia juego 1 contra CPU")
-            if botonUnoContraDosCpu.dibujar(pantalla, "Centrado"):
+            if botonUnoContraDosCpu.dibujar("Centrado"):
                 pantallaAzul = True
                 print("inicia juego 1 contra 2 CPU")
     # PANTALLA DE TITULO
