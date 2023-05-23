@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import string
 from typing import Optional
 from typing import Union
 from hexCoord import HexCoord
@@ -75,12 +76,12 @@ class Tablero:
             "b_caballo": [(-1, -3, 4), (1, -4, 3)],
             "b_torre": [(-2, -3, 5), (2, -5, 3)],
             "b_alfil": [(0, -3, 3), (0, -4, 4), (0, -5, 5)],
-            "b_reina": [(-1, -4, 5)],
+            "b_dama": [(-1, -4, 5)],
             "b_rey": [(1, -5, 4)],
 
             "n_peon": [(-n, 2+n, -2) for n in range(4)] + [(n, 2, -2-n) for n in range(4)],
             "n_alfil": [(0, 5, -5), (0, 4, -4), (0, 3, -3)],
-            "n_reina": [(-1, 5, -4)],
+            "n_dama": [(-1, 5, -4)],
             "n_rey": [(1, 4, -5)],
             "n_torre": [(-2, 5, -3), (2, 3, -5)],
             "n_caballo": [(1, 3, -4), (-1, 4, -3)],
@@ -92,14 +93,14 @@ class Tablero:
             McCooeyPos.update({
                 "n_peon": [(-2-n, 2, +n) for n in range(4)] + [(-2, 2 + n, -n) for n in range(4)],
                 "n_alfil": [(-5, 5, 0), (-4, 4, 0), (-3, 3, 0)],
-                "n_reina": [(-4, 5, -1)],
+                "n_dama": [(-4, 5, -1)],
                 "n_rey": [(-5, 4, 1)],
                 "n_torre": [(-3, 5, -2), (-5, 3, 2)],
                 "n_caballo": [(-4, 3, 1), (-3, 4, -1)],
 
                 "r_peon": [(2, +n, -2-n) for n in range(4)] + [(2 + n, -n, -2) for n in range(4)],
                 "r_alfil": [(5, 0, -5), (4, 0, -4), (3, 0, -3)],
-                "r_reina": [(5, -1, -4)],
+                "r_dama": [(5, -1, -4)],
                 "r_rey": [(4, 1, -5)],
                 "r_torre": [(5, -2, -3), (3, 2, -5)],
                 "r_caballo": [(3, 1, -4), (4, -1, -3)],
@@ -113,6 +114,13 @@ class Tablero:
                 mapaInicial[HexCoord(*posicion)] = pieza
 
         return mapaInicial
+
+    def encontrarCoordenadaReal(hexagono: HexCoord) -> str:
+        """Retorna un texto con las coordenadas del hexagono en formato letra y número."""
+        # Realiza una corrección en las coordenadas en donde desplaza las coordenadas verticales según la letra.
+        desplazamiento = abs(hexagono.p) if hexagono.p < 0 else 0
+        # Convierte la coordenada p en una letra de la A a la K, y convierte la coordenada q en un numero del 1 al 11.
+        return (string.ascii_uppercase[5+hexagono.p]+str(6+hexagono.q-desplazamiento))
 
     def generarMovimientos(self, posInicial: HexCoord) -> list[HexCoord]:
         """
@@ -279,7 +287,7 @@ class Tablero:
                 if casilla.coordenada != coordenada:
                     yield casilla.coordenada, coordenada
 
-    def moverPieza(self, posInicial: HexCoord, posFinal: HexCoord, desde: str):
+    def moverPieza(self, posInicial: HexCoord, posFinal: HexCoord, desde: str) -> str:
         """Realiza el movimiento desde posicion inicial hasta la posicion final."""
         if posInicial == posFinal:
             return
@@ -295,21 +303,25 @@ class Tablero:
                     # Si el peon es blanco:
                     if (piezaMovida[0] == "b"):
                         if ((posFinal.q) == 5 or (posFinal.r) == -5):
-                            self.__setitem__(posFinal, "b_reina")
+                            self.__setitem__(posFinal, "b_dama")
                     # Si el peon es negro:
                     elif (piezaMovida[0] == "n"):
                         # Si hay 3 jugadores:
                         if (self.piezas.colores.endswith("r")):
                             if ((posFinal.p) == 5 or (posFinal.q) == -5):
-                                self.__setitem__(posFinal, "n_reina")
+                                self.__setitem__(posFinal, "n_dama")
                         # Si hay 2 jugadores:
                         else:
                             if ((posFinal.q) == -5 or (posFinal.r) == 5):
-                                self.__setitem__(posFinal, "n_reina")
+                                self.__setitem__(posFinal, "n_dama")
                     # Si el peon es rojo:
                     else:
                         if ((posFinal.p) == -5 or (posFinal.q) == 5):
-                            self.__setitem__(posFinal, "r_reina")
+                            self.__setitem__(posFinal, "r_dama")
+                colorPieza = "blanco" if piezaMovida[0]=="b" else "negro" if piezaMovida[0]=="n" else "rojo"
+                if piezaMovida[2:].endswith("a"):
+                    colorPieza = colorPieza[:-1]+"a"
+                return(piezaMovida[2:]+" "+colorPieza+" "+Tablero.encontrarCoordenadaReal(posInicial)+" a "+Tablero.encontrarCoordenadaReal(posFinal))
             
     def elReyEstaEnJaque(self, color: str) -> bool:
         """Comprobar si un rey del color especificado está en jaque en este momento."""
