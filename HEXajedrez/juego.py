@@ -2,7 +2,7 @@ import pygame
 from typing import Optional
 from tablero import Tablero
 from hexCoord import HexCoord
-from hexCasilla import HexCasilla
+from hexCelda import HexCelda
 from pixel import PixelCoord
 from hexPixelAdaptador import HexPixelAdaptador
 from piezas import Piezas
@@ -41,7 +41,7 @@ class Juego:
         HEX_TABLERO: Tablero = Tablero.generarMcCooey("bn")
         # El radio de un hexagono individual en pantalla, en pixeles.
         HEX_RADIO: float = 35.5
-        # Lista de los colores de las casillas.
+        # Lista de los colores de las celdas.
         HEX_COLORES: list[tuple] = [
             (60, 120, 60), (40, 40, 200), (184, 40, 50)]
 
@@ -55,12 +55,12 @@ class Juego:
 
         # El estado de la pieza seleccionada.
         piezaSeleccionada: Optional[HexCoord] = None
-        # Cuando se elige una pieza guarda la coordena inicial de la pieza tomada       piezaSeleccionada: Optional[HexCoord] = None  # Guarda el estado(nombre) de la pieza tomada
+        # Cuando se elige una pieza guarda la coordena inicial de la pieza tomada.
         coordPiezaInicial: Optional[HexCoord] = None
-        # Guarda los movimientos validos de la pieza tomada
+        # Guarda los movimientos validos de la pieza tomada.
         movimientosValidos: Optional[list[HexCoord]] = None
 
-        self.turnoJugador: int = 0  # Si la capa actual del juego es pareja o no.
+        self.turnoJugador: int = 0  # Describe de quien es el turno (0: Blanco, 1: Negro, 2: Rojo).
         estadoRey: str = ""  # Un mensaje sobre el estado de cualquiera de los reyes..
         turnoTexto: str = ""  # Mensaje de qué lado es el turno.
         
@@ -84,15 +84,15 @@ class Juego:
             pygame.draw.polygon(PANTALLA, color, ADAPTADOR.getVertices(
                 coordenada), 0 if llenar else 3)
 
-        def dibujarPiezas(casilla: HexCasilla):
+        def dibujarPiezas(celda: HexCelda):
             """Dibuja una pieza en pantalla segun la celd ingresada."""
-            pixelCoords: PixelCoord = ADAPTADOR.hexAPixel(casilla.coordenada)
+            pixelCoords: PixelCoord = ADAPTADOR.hexAPixel(celda.coordenada)
 
-            if casilla.estado is not None:
-                if casilla.coordenada == coordPiezaInicial:
+            if celda.estado is not None:
+                if celda.coordenada == coordPiezaInicial:
                     return
                 PANTALLA.blit(
-                    imagenesDePiezas[casilla.estado], pixelCoords - AREA_PIEZA)
+                    imagenesDePiezas[celda.estado], pixelCoords - AREA_PIEZA)
                 
         def actualizaElTurno():
             """Comprueba las jugadas realizadas y así determina de qué lado es el turno."""
@@ -191,10 +191,10 @@ class Juego:
                 f"img/Fondo_Juego.png").convert_alpha(), (700, 700)), (-5, -2))
 
             # Dibuja los hexagonos de color.
-            for casilla in HEX_TABLERO:
+            for celda in HEX_TABLERO:
                 color: tuple[int, int, int] = HEX_COLORES[(
-                    casilla.coordenada.q - casilla.coordenada.r) % 3]
-                dibujaHex(casilla.coordenada, color, llenar=True)
+                    celda.coordenada.q - celda.coordenada.r) % 3]
+                dibujaHex(celda.coordenada, color, llenar=True)
 
             # Dibuja los colores segun el estado del movimiento. Verde: movimientos posibles, Rojo: capturar piezas, Azul: celda actual.
             if coordPiezaInicial is not None:
@@ -206,9 +206,9 @@ class Juego:
                 dibujaHex(coordPiezaInicial, (50, 50, 255), llenar=True)
 
             # Dibuja el borde negro de los hexagonos y dibuja las piezas.
-            for casilla in HEX_TABLERO:
-                dibujaHex(casilla.coordenada, (20, 20, 20))
-                dibujarPiezas(casilla)
+            for celda in HEX_TABLERO:
+                dibujaHex(celda.coordenada, (20, 20, 20))
+                dibujarPiezas(celda)
 
             # Si estamos sosteniendo una pieza se dibuja en la posicion del mouse.
             if piezaSeleccionada:
