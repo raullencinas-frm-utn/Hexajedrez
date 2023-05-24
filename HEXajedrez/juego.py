@@ -2,10 +2,12 @@ import pygame
 from typing import Optional
 from tablero import Tablero
 from hexCoord import HexCoord
-from hexCasilla import HexCasilla
+from hexCelda import HexCelda
 from pixel import PixelCoord
 from hexPixelAdaptador import HexPixelAdaptador
 from piezas import Piezas
+from boton import Boton
+from imagen import Imagen
 
 
 class Juego:
@@ -39,7 +41,7 @@ class Juego:
         HEX_TABLERO: Tablero = Tablero.generarMcCooey("bn")
         # El radio de un hexagono individual en pantalla, en pixeles.
         HEX_RADIO: float = 35.5
-        # Lista de los colores de las casillas.
+        # Lista de los colores de las celdas.
         HEX_COLORES: list[tuple] = [
             (60, 120, 60), (40, 40, 200), (184, 40, 50)]
 
@@ -53,41 +55,56 @@ class Juego:
 
         # El estado de la pieza seleccionada.
         piezaSeleccionada: Optional[HexCoord] = None
-        # Cuando se elige una pieza guarda la coordena inicial de la pieza tomada       piezaSeleccionada: Optional[HexCoord] = None  # Guarda el estado(nombre) de la pieza tomada
+        # Cuando se elige una pieza guarda la coordena inicial de la pieza tomada.
         coordPiezaInicial: Optional[HexCoord] = None
-        # Guarda los movimientos validos de la pieza tomada
+        # Guarda los movimientos validos de la pieza tomada.
         movimientosValidos: Optional[list[HexCoord]] = None
 
-        self.turnoJugador: int = 0  # Si la capa actual del juego es pareja o no.
+        self.turnoJugador: int = 0  # Describe de quien es el turno (0: Blanco, 1: Negro, 2: Rojo).
         estadoRey: str = ""  # Un mensaje sobre el estado de cualquiera de los reyes..
         turnoTexto: str = ""  # Mensaje de qué lado es el turno.
         
+        registroMovimientos = [] # Lista de movimientos realizados por todos los jugadores.
+        desplazamientoRegistro = 0
+
+        desplazamientoArribaImg = Imagen("img/boton_Arriba.png")
+        desplazamientoAbajoImg = Imagen("img/boton_Abajo.png")
+
+        botonDesplazamientoArriba = Boton(1030, 125, desplazamientoArribaImg.obtenerImagen(), .75)
+        botonDesplazamientoAbajo = Boton(1030, 650, desplazamientoAbajoImg.obtenerImagen(), .75)
+
+        @staticmethod
+        def actualizarRegistro(movimiento, registro) -> bool:
+            """Se actualiza el historial de movimientos con el movimiento que se pasa como parametro."""
+            if movimiento != None:
+                registro.append(movimiento)
+            return len(registro) > 15
 
         def dibujaHex(coordenada: HexCoord, color: tuple, llenar=False):
             """Dibuja un hexagono en la pantalla."""
             pygame.draw.polygon(PANTALLA, color, ADAPTADOR.getVertices(
                 coordenada), 0 if llenar else 3)
 
-        def dibujarPiezas(casilla: HexCasilla):
+        def dibujarPiezas(celda: HexCelda):
             """Dibuja una pieza en pantalla segun la celd ingresada."""
-            pixelCoords: PixelCoord = ADAPTADOR.hexAPixel(casilla.coordenada)
+            pixelCoords: PixelCoord = ADAPTADOR.hexAPixel(celda.coordenada)
 
-            if casilla.estado is not None:
-                if casilla.coordenada == coordPiezaInicial:
+            if celda.estado is not None:
+                if celda.coordenada == coordPiezaInicial:
                     return
                 PANTALLA.blit(
-                    imagenesDePiezas[casilla.estado], pixelCoords - AREA_PIEZA)
+                    imagenesDePiezas[celda.estado], pixelCoords - AREA_PIEZA)
                 
         def actualizaElTurno():
             """Comprueba las jugadas realizadas y así determina de qué lado es el turno."""
-            print(self.turnoJugador)
+
             self.turnoJugador = HEX_TABLERO.turno % len(self.piezas.colores)
             if self.turnoJugador < 1:
-                self.turnoTexto = "Turno del Jugador Blanco"
+                self.turnoTexto = "Blanco"
             elif self.turnoJugador == 1:
-                self.turnoTexto = "Turno del Jugador Negro" 
+                self.turnoTexto = "Negro" 
             else:
-                self.turnoTexto ="Turno del Jugador Rojo" 
+                self.turnoTexto ="Rojo" 
                 
             if HEX_TABLERO.elReyEstaEnJaque('b'):
                 if HEX_TABLERO.elReyEstaEnJaqueMate('b'):
@@ -107,9 +124,11 @@ class Juego:
             else:
                 self.estadoRey = ""
                 
-        def escribeTexto(texto: str, coordenadas: tuple[int, int, int]):
-            """Un método usado para escribir texto en la pantalla."""
-            PANTALLA.blit(FUENTE.render(texto, True, (0, 0, 0)), coordenadas)
+        def escribeTexto(texto: str,tamanio: int, x: any, y: any, colorTexto):
+            """ Genenera un texto en pantalla con la FUENTE y color de texto elegidos en la 
+            posicion "x" e "y" de la pantalla con el texto elegido. """
+            img = pygame.font.Font("fnt/8-Bit.TTF", tamanio).render(texto, True, colorTexto)
+            PANTALLA.blit(img, (x, y) )  
 
         juegoEjecutandose = True
         actualizaElTurno()
@@ -157,8 +176,10 @@ class Juego:
                     # De otro modo, se realizo clic con una pieza en mano.
                     else:
                         if coordSeleccion in movimientosValidos:
-                            HEX_TABLERO.moverPieza(
+                            nuevoMov = HEX_TABLERO.moverPieza(
                                 coordPiezaInicial, coordSeleccion, "jugador")
+                            if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
+                            
                             piezaSeleccionada = coordPiezaInicial = None
                             actualizaElTurno()
             # se pone la pantalla de color blanco
@@ -166,15 +187,15 @@ class Juego:
 
             # se muestra la pantalla del juego con la imagen "Fondo_Juego.jpg"
             PANTALLA.blit(pygame.transform.scale(pygame.image.load(
-                f"img/Fondo_Estado.png").convert_alpha(), (410, 710)), (690, 0))
+                f"img/Fondo_Estado.png").convert_alpha(), (410, 710)), (690, -5))
             PANTALLA.blit(pygame.transform.scale(pygame.image.load(
                 f"img/Fondo_Juego.png").convert_alpha(), (700, 700)), (-5, -2))
 
             # Dibuja los hexagonos de color.
-            for casilla in HEX_TABLERO:
+            for celda in HEX_TABLERO:
                 color: tuple[int, int, int] = HEX_COLORES[(
-                    casilla.coordenada.q - casilla.coordenada.r) % 3]
-                dibujaHex(casilla.coordenada, color, llenar=True)
+                    celda.coordenada.q - celda.coordenada.r) % 3]
+                dibujaHex(celda.coordenada, color, llenar=True)
 
             # Dibuja los colores segun el estado del movimiento. Verde: movimientos posibles, Rojo: capturar piezas, Azul: celda actual.
             if coordPiezaInicial is not None:
@@ -186,9 +207,9 @@ class Juego:
                 dibujaHex(coordPiezaInicial, (50, 50, 255), llenar=True)
 
             # Dibuja el borde negro de los hexagonos y dibuja las piezas.
-            for casilla in HEX_TABLERO:
-                dibujaHex(casilla.coordenada, (20, 20, 20))
-                dibujarPiezas(casilla)
+            for celda in HEX_TABLERO:
+                dibujaHex(celda.coordenada, (20, 20, 20))
+                dibujarPiezas(celda)
 
             # Si estamos sosteniendo una pieza se dibuja en la posicion del mouse.
             if piezaSeleccionada:
@@ -197,12 +218,25 @@ class Juego:
 
             # Se dibuja la linea que va a separar el tablero con la interfaz de turnos.
             pygame.draw.line(PANTALLA, (62, 48, 92),
-                             (ANCHO_JUEGO, 0), (ANCHO_JUEGO, ALTO_JUEGO), 13)
+                             (ANCHO_JUEGO, 0), (ANCHO_JUEGO, ALTO_JUEGO), 15)
 
-            escribeTexto(self.turnoTexto, (ANCHO_JUEGO+90, 613))
+            # Dibuja los movimientos guardados en el registro
+            for i in range(15):
+                if 0 <= (i + desplazamientoRegistro) < len(registroMovimientos):
+                    escribeTexto(registroMovimientos[i + desplazamientoRegistro], 15 , (ANCHO_JUEGO + 30) , (145 + i * 35), (255,255,255))
+
+            if botonDesplazamientoArriba.dibujar(""):
+                if desplazamientoRegistro > 0: 
+                            desplazamientoRegistro -= 1
+            if botonDesplazamientoAbajo.dibujar(""):
+                desplazamientoRegistro += 1
+
+            # Describe de quien es el turno:
+            escribeTexto("Turno del jugador", 20, (ANCHO_JUEGO+30), 38,(255,255,255))
+            escribeTexto(self.turnoTexto, 20, (ANCHO_JUEGO+140), 64,(255,255,255))
+            # Describe el estado de Jaque:
+            escribeTexto(self.estadoRey, 15, (ANCHO_JUEGO+45+len(self.estadoRey)), 95,(255,255,255))
             
-            escribeTexto(self.estadoRey, (ANCHO_JUEGO+90+len(self.estadoRey), 650))
-
             # Actualiza la pantalla.
             pygame.display.flip()
 
