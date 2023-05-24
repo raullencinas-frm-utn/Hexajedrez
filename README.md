@@ -16,5 +16,5 @@ Varberde Thompson, Francisco Alejandro.
 Profesor: Carlos Rodriguez.
 Metodología de la Investigación.
 Tecnicatura Universitaria en Programación.
-Universidad Técnica Nacional, Facultad Regional de Mendoza.
+Universidad Tecnológica Nacional, Facultad Regional de Mendoza.
 ```
