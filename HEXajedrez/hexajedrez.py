@@ -42,6 +42,341 @@ def dibujaTexto(texto, tamanio, colorTexto, x, y):
         "fnt/8-Bit.TTF", tamanio).render(texto, True, colorTexto)
     pantalla.blit(img, (x, y))
 
+def draw_text_box(text, width, height):
+    y = 700-height
+    x = 1100
+    WHITE = (255, 255, 255)
+    fuenteTam = 25
+    fuente = pygame.font.SysFont(None, fuenteTam)
+    lines = []
+    words = text.split(" ")
+    current_line = words[0]
+    for word in words[1:]:
+        test_line = current_line + " " + word
+        if fuente.size(test_line)[0] <= width:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    lines.append(current_line)
+
+    y += (height - len(lines) * (fuenteTam + 2.5)) // 2
+    
+    for line in lines:
+        text_surface = fuente.render(line, True, WHITE)
+        text_rect = text_surface.get_rect()
+        text_rect.centerx = x // 2
+        text_rect.y = y
+        pygame.draw.rect(pantalla, (0, 0, 0), ((text_rect.x-2.5),(y-2.5),(text_rect.width+5),(text_rect.height+5)))
+        pantalla.blit(text_surface, text_rect)
+        y += fuenteTam + 5
+    
+    
+def comoJugar():
+    y = ALTO_PANTALLA/2
+    x = ANCHO_PANTALLA/2
+    esFin = False
+    pagina = 0
+    comoJugar = {
+        "inicio": {
+            "imagen": "img/como/p_inicio.png",
+            "descripcion": "Esta pantalla te da la bienvenida y te invita a sumergirte en una emocionante partida de Hexajedrez. Al presiona la tecla de espacio podrás explorar distintas modalidades de juego."
+        },
+        "seleccion1": {
+            "imagen": "img/como/p_seleccion.png",
+            "descripcion": "Luego de presionar espacio se presentan diferentes opciones para que el jugador elija la modalidad que prefiera:"
+        },
+        "seleccion2": {
+            "imagen": "img/como/p_seleccion.png",
+            "descripcion": "Uno contra uno: En este modo podrás desafiar a otro jugador en una partida de hexajedrez. Puedes disfrutar de partidas amistosas o competir estratégicamente con amigos o familiares."
+        },
+        "seleccion3": {
+            "imagen": "img/como/p_seleccion.png",
+            "descripcion": "Uno contra dos: Este modo te permitirá poner a prueba tus habilidades enfrentándote a dos oponentes controlados por jugadores. Excelente opción si deseas un desafío adicional o si quieres practicar tus estrategias enfrentando multiples adversarios."
+        },
+        "seleccion4": {
+            "imagen": "img/como/p_seleccion.png",
+            "descripcion": "Uno contra CPU: En esta modalidad podrás enfrentarte a una computadora controlada por el juego que te desafiará en el Hexajedrez ideal para entrenar y mejorar tus estrategias asi como perfeccionar tus movimientos."
+        },
+        "seleccion5": {
+            "imagen": "img/como/p_seleccion.png",
+            "descripcion": "Uno contra dos CPUs: En este modo tendrás la oportunidad de enfrentarte a multiples oponentes controlados por la computadora, lo cual te brindará una experiencia desafiante y emocionante."
+        },
+        "juego": {
+            "imagen": "img/como/p_juego.png",
+            "descripcion": "El tablero de juego tiene una forma hexagonal única, y está compuesto por 91 hexagonos en total con 6 hexágonos en cada lado que pueden variar en 3 colores diferentes."
+        },
+        "1vs1": {
+            "imagen": "img/como/p_1vs1.png",
+            "descripcion": "En el modo uno contra uno los jugadores utilizan dos colores de piezas blancas y negras. Cada jugador cuenta con 7 peones, 2 caballos, 2 torres, 3 alfiles, la dama, y por último el rey."
+        },
+        "1vs2": {
+            "imagen": "img/como/p_1vs2.png",
+            "descripcion": "En el modo uno contra dos oponentes las piezas se encuentran ubicadas en 3 de los vértices enfrentados del tablero hexagonal. Se agregan las piezas de color rojo para representar al tercer jugador."
+        },
+        "1vs2a": {
+            "imagen": "img/como/p_1vs2.png",
+            "descripcion": "Esta variante de juego con 3 jugadores suma un nuevo nivel de complejidad y estrategia ya que los jugadores deberan considerar las interacciones con dos oponentes." 
+        },
+
+        "peon": {
+            "imagen": "img/como/m_peon.png",
+            "descripcion": "En la siguientes imágenes se muestran los movimientos correspondientes a las piezas del Hexajedrez comenzando con el peón:"
+        },
+
+        "peon1": {
+            "imagen": "img/como/m_peon.png",
+            "descripcion": "Al igual que en el ajedrez convencional, los peones se desplazan hacia adelante en el tablero hexagonal."
+        },
+
+        "peon1.1": {
+            "imagen": "img/como/m_peon.png",
+            "descripcion": "Cuando se encuentra en su posición inicial tiene la opción de avanzar dos hexágonos hacia adelante en lugar de uno. Esto le brinda la posibilidad de realizar un avance estratégico desde el inicio del juego."
+        },
+
+        
+        "peon2": {
+            "imagen": "img/como/m_peon2.png",
+            "descripcion": "Sin embargo si el peon ya se ha movido de su posicion inicial solo puede avanzar un hexágono hacia adelante en cada turno."
+        },
+
+        "peon2.1": {
+            "imagen": "img/como/m_peon2.png",
+            "descripcion": "Ademas el peón tiene la capacidad de capturar las piezas en los hexagonos adyacentes en sentido diagonal. Esto significa que puede eliminar las piezas en las posiciones diagonales hacia adelante a su izquierda o derecha."
+        },
+
+
+        "torre": {
+            "imagen": "img/como/m_torre.png",
+            "descripcion": "La torre puede moverse verticalmente horizontalmente o en diagonal dentro de los hexágonos adyacentes que comparten lados con su posición actual."
+        },
+
+        "torre1": {
+            "imagen": "img/como/m_torre.png",
+            "descripcion": "La torre puede avanzar o retroceder en estas direcciones rectas siempre y cuando no haya obstáculos en su camino."
+        },
+
+        "torre2": {
+            "imagen": "img/como/m_torre.png",
+            "descripcion": "La torre no puede saltar sobre otras piezas. Si hay una pieza bloqueando el camino de la torre no podrá pasar mas allá de esa posición."
+        },
+
+        "torre3": {
+            "imagen": "img/como/m_torre.png",
+            "descripcion": "Aprovecha la movilidad de la torre en el tablero hexagonal para controlar filas y columnas atacar a las piezas enemigas y establecer una defensa sólida."
+            },
+
+        "torre4": {
+            "imagen": "img/como/m_torre.png",
+            "descripcion": "La torre es una pieza valiosa en Hexajedrez y su correcto uso puede marcar la diferencia en el desarrollo de la partida."
+            },
+        "alfil": {
+            "imagen": "img/como/m_alfil.png",
+            "descripcion": "El alfil puede moverse a traves de los hexagonos que comparten los vértices del hexágono actual permitiendo un movimiento en diagonal y horizontal."
+        },
+
+        "alfil1": {
+            "imagen": "img/como/m_alfil.png",
+            "descripcion": "Es importante tener en cuenta que no puede saltar sobre otras piezas y su movimiento está limitado a los hexágonos en el camino de los vertices."
+        },
+
+        "alfil2": {
+            "imagen": "img/como/m_alfil.png",
+            "descripcion": "Utiliza al alfil de manera inteligente para atacar desde diferentes angulos controlar areas clave del tablero y desplegar una estrategia efectiva en Hexajedrez."
+        },
+
+        "alfil2": {
+            "imagen": "img/como/m_alfil.png",
+            "descripcion": "Su combinación de movimientos diagonal y horizontal lo convierte en una pieza valiosa para dominar el juego."
+        },
+
+        "dama": {
+            "imagen": "img/como/m_dama.png",
+            "descripcion": "La dama puede moverse verticalmente, horizontalmente, y en diagonal a traves de los hexagonos adyacentes. Su alcance abarca todas las direcciones posibles en el tablero."
+        },
+
+        "dama1": {
+            "imagen": "img/como/m_dama.png",
+            "descripcion": "Al igual que las piezas anteriores, la dama no puede saltar sobre otras piezas y su movimiento está limitado a los hexágonos disponibles en su camino."
+        },
+
+        "dama2": {
+            "imagen": "img/como/m_dama.png",
+            "descripcion": "La versatilidad y amplitud de movimiento de la dama la convierten en una pieza poderosa en Hexajedrez."
+        },
+
+        "dama3": {
+            "imagen": "img/como/m_dama.png",
+            "descripcion": "Puede atacar desde diversas direcciones, controlar múltiples areas del tablero y ser un factor determinante en el desarrollo del juego. Aprovecha al máximo las capacidades estratégicas de la dama para obtener ventaja sobre tus oponentes en Hexajedrez."
+        }, 
+
+        "rey": {
+            "imagen": "img/como/m_rey.png",
+            "descripcion": "El rey tiene la capacidad de moverse en todas las direcciones pero se limita a moverse solo un hexágono por turno."
+        }, 
+        
+
+        "caballo": {
+            "imagen": "img/como/m_caballo.png",
+            "descripcion": "El caballo se mueve en dirección a los vertices de los hexágonos. Su movimiento especial consiste en trasladarse al hexágono que comparte lado con el hexágono que comparte vértice con el hexágono de partida"
+        },
+        
+        "caballo1": {
+            "imagen": "img/como/m_caballo.png",
+            "descripcion": "Puede moverse en cualquier dirección hacia estos hexágonos saltando sobre otras piezas en el proceso."
+        },
+
+        "caballo2": {
+            "imagen": "img/como/m_caballo.png",
+            "descripcion": "Aprovecha esta capacidad unica de los caballos en Hexajedrez para sorprender a tus oponentes, crear amenazas estratégicas, y aprovechar las oportunidades tácticas."
+        },
+
+        "rey1": {
+            "imagen": "img/como/m_rey.png",
+            "descripcion": "El rey puede desplazarse verticalmente horizontalmente y en diagonal a través de los hexágonos adyacentes siempre avanzando un solo paso a la vez."
+        }, 
+        
+        "rey2": {
+            "imagen": "img/como/m_rey.png",
+            "descripcion": "Su rango de movimiento es más limitado en comparación con la dama pero sigue siendo esencial para la supervivencia y estrategia del juego."
+        },
+
+        "rey3": {
+            "imagen": "img/como/m_rey.png",
+            "descripcion": "El objetivo principal del juego es poner al rey en una posición de jaque mate por lo que debes asegurarte de mantenerlo seguro y evitar amenazas directas. Si el rey es capturado, la partida se pierde."
+        },
+
+        "rey4": {
+            "imagen": "img/como/m_rey.png",
+            "descripcion": "Utiliza al rey de manera inteligente para protegerlo y buscar oportunidades estratégicas. Mueve al rey con precaucion evaluando el entorno y considerando las amenazas potenciales"
+        },
+
+        "rey5": {
+            "imagen": "img/como/m_rey.png",
+            "descripcion": "Recuerda que la seguridad del rey es fundamental para alcanzar la victoria en Hexajedrez."
+        },
+
+
+        "estado": {
+            "imagen": "img/como/p_estado.png",
+            "descripcion": "En este panel se muestra información relevante sobre el estado actual del juego."
+        },
+
+        "estado1": {
+            "imagen": "img/como/p_estado.png",
+            "descripcion": "En la parte superior del panel se encuentra un mensaje que indica de qué jugador es el turno. Esto es útil para tener claridad sobre quién debe tomar su jugada en cada momento."
+        },
+
+        "estado2": {
+            "imagen": "img/como/p_estado.png",
+            "descripcion": "El panel notifica si el rey esta en jaque o jaque mate. Esto es importante para saber si el rey de un jugador está en una posicion amenazada por una pieza enemiga o si el rey ha sido capturado."
+        },
+
+        "estado3": {
+            "imagen": "img/como/p_estado.png",
+            "descripcion": "En el panel lateral también se muestra una lista con los movimientos realizados durante la partida. Esto permite tener un registro de todas las jugadas que se han llevado a cabo."
+        },
+
+        "estado4": {
+            "imagen": "img/como/p_estado.png",
+            "descripcion": "Finalmente el panel lateral cuenta con botones que permiten desplazarnos por la vista de los movimientos. Estos botones facilitan la navegación entre los movimientos, lo que brinda la posibilidad de revisar y repasar las jugadas realizadas en cualquier momento."},
+
+        "pausa": {
+            "imagen": "img/como/p_pausa.png",
+            "descripcion": "El menú de pausa en Hexajedrez. Este menú se puede acceder en cualquier momento durante el juego al presionar la tecla de escape. El menú de pausa ofrece varias opciones para el jugador incluyendo:"
+        },
+
+        "pausa1": {
+            "imagen": "img/como/p_pausa.png",
+            "descripcion": "Continuar: Al seleccionar esta opción, el juego se reanuda desde el punto en el que fue pausado y se regresa a la pantalla de juego activa."
+        },
+        "pausa2": {
+            "imagen": "img/como/p_pausa.png",
+            "descripcion": "Opciones: Al seleccionar esta opción se abre un submenú que permite al jugador personalizar diferentes configuraciones del juego como la dificultad, el sonido y la música."
+        },
+        "pausa3": {
+            "imagen": "img/como/p_pausa.png",
+            "descripcion": "Como Jugar: Al seleccionar esta opción se muestra una pantalla con las instrucciones y reglas básicas del juego proporcionando orientación adicional sobre como jugar Hexajedrez."
+            },
+        "pausa4": {
+            "imagen": "img/como/p_pausa.png",
+            "descripcion": "Créditos: Al seleccionar esta opción se muestra una pantalla que reconoce a los integrantes y detalles del proyecto."
+        },
+        "pausa5": {
+            "imagen": "img/como/p_pausa.png",
+            "descripcion": "Menú Principal: Al seleccionar esta opción se regresa al menú principal del juego, dónde se pueden realizar otras acciones como iniciar una nueva partida o seleccionar un modo de juego diferente."
+        },
+        "pausa6": {
+            "imagen": "img/como/p_pausa.png",
+            "descripcion": "Salir: Al seleccionar esta opción se sale completamente del juego y se cierra la aplicación."
+        },
+        "opciones": {
+            "imagen": "img/como/p_opciones.png",
+            "descripcion": "En la siguiente imágen se muestra el menú de opciones en Hexajedrez. Este menú ofrece diferentes configuraciones y ajustes que el jugador puede modificar según sus preferencias. Las opciones disponibles en el menú de opciones incluyen:"
+        },
+        "opciones1": {
+            "imagen": "img/como/p_opciones.png",
+            "descripcion": "Dificultad: Permite al jugador seleccionar el nivel de dificultad del juego. Esto determinará el nivel de desafío que enfrentará el jugador al enfrentarse a la computadora. Las opciones de dificultad pueden variar de fácil, medio, o difícil. Los invitamos a descubrir las funciones propias de cada modo."
+        },
+        "opciones2": {
+            "imagen": "img/como/p_opciones.png",
+            "descripcion": "Sonido: Permite al jugador activar o desactivar los efectos de sonido del juego. Al activar el sonido se reproducirán efectos de sonido relacionados con las acciones del juego como movimientos de piezas o selección. Al desactivar el sonido, el juego se jugará sin efectos de sonido."
+        },
+        "opciones3": {
+            "imagen": "img/como/p_opciones.png",
+            "descripcion": "Música: Permite al jugador activar o desactivar la música de fondo del juego. Si se activa la música se reproducirá una melodía de fondo durante la partida lo que puede agregar ambiente al juego. Si se desactiva la música el juego se jugará sin musica de fondo."        
+        },
+        "opciones4": {
+            "imagen": "img/como/p_opciones.png",
+            "descripcion": "Volver: Al seleccionar esta opción el jugador regresará al menú de pausa donde se pueden realizar otros ajustes o continuar con el juego"
+        },
+        "guardado": {
+            "imagen": "img/como/p_guardado.png",
+            "descripcion": "Al iniciar el juego después de una interrupción o cierre previo se muestra el mensaje: Hay una partida guardada, Presiona la tecla Espacio para continuar o la tecla N para comenzar una nueva partida. El jugador tiene dos opciones disponibles:"
+        },
+
+        "guardado1": {
+            "imagen": "img/como/p_guardado.png",
+            "descripcion": "Presionar la tecla Espacio: Esto permitirá al jugador retomar la partida guardada desde el punto en que se interrumpió. El juego se cargará y el jugador podrá continuar jugando desde ese punto."
+        },
+
+        "guardado2": {
+            "imagen": "img/como/p_guardado.png",
+            "descripcion": "Presionar la tecla N: Si el jugador desea comenzar una nueva partida en lugar de continuar la partida guardada se seleccionará esta opción. Al hacerlo se accederá al menú de selección de modo de juego."
+        }
+    }
+    running = True
+    while running:
+        for ayuda, info in comoJugar.items():
+            pantalla.blit(pygame.transform.scale(pygame.image.load(
+                f"img/Fondo_Naranja.jpg").convert_alpha(), (1100, 715)), ( 0, -2.5))
+            pantalla.blit(
+            Imagen(info["imagen"]).obtenerImagen(), (
+                x - (Imagen(info["imagen"]).obtenerImagen().get_width()/2),(y-(Imagen(info["imagen"]).obtenerImagen().get_height()/2))))
+            botonTitulo: str = "Finalizar" if esFin else "Continuar"
+            botonContinuar = Boton(840, 650, FUENTE.render(botonTitulo, True, (255, 255, 255)), .9)
+            pantalla.blit(Imagen("img/HEXajedrez.png").redimensionar(500,125), (310, 10))
+            draw_text_box(info["descripcion"], 750, 150)
+            siguiente = True
+            while siguiente:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        pygame.quit()
+                        exit()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        mouse_pos = pygame.mouse.get_pos()
+                        if botonContinuar.rectangulo.collidepoint(mouse_pos):
+                            
+                            if (pagina == 54):
+                                esFin = True
+                            siguiente = False
+                            pagina+=1 
+                    botonContinuar.dibujar("")
+                    pygame.display.flip()
+        comoJugar = None
+        running = False
 
 # Imagenes del Menu
 unoContraUnoImg = Imagen("img/boton_uno_contra_uno.png")
@@ -51,7 +386,6 @@ unoContraDosCpuImg = Imagen("img/boton_uno_contra_dos_cpu.png")
 
 # Titulo menu
 hexajedrezImg = Imagen("img/HEXajedrez.png")
-
 
 # Imagen de fondo
 fondoRojoImg = Imagen('img/Fondo_Rojo.png')
@@ -96,7 +430,7 @@ while ejecucion:
             pantallaDeOpciones = True
             print("Opciones")
         if botonComoJugar.dibujar("Centrado"):
-            print("Como Jugar")
+            comoJugar()
         if botonCreditos.dibujar("Centrado"):
             print("Creditos")
         if botonSalir.dibujar("Centrado"):
