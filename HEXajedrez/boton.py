@@ -1,5 +1,5 @@
 import pygame
-from sonido import Sonidos
+from sonido import Sonido
 
 class Boton:
     def __init__(self, x, y, imagen, escala):
@@ -29,7 +29,7 @@ class Boton:
         if self.rectangulo.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1 and self.seleccionado == False:
                 if sonido:
-                    Sonidos.sonidoBoton()
+                    Sonido.sonidoBoton()
                 self.seleccionado = True
                 accion = True
 

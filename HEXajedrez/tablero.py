@@ -3,11 +3,14 @@ from __future__ import annotations
 
 import copy
 import string
+import pygame
 from typing import Optional
 from typing import Union
 from hexCoord import HexCoord
 from hexCelda import HexCelda
 from piezas import Piezas
+from boton import Boton
+from imagen import Imagen
 
 
 class Tablero:
@@ -297,6 +300,59 @@ class Tablero:
                 if celda.coordenada != coordenada:
                     yield celda.coordenada, coordenada
 
+    def dibujarMenuPromocion(self, color: str) -> str:
+        """Dibuja el menú de promoción y devuelve la pieza seleccionada."""
+        PANTALLA = pygame.display.get_surface()
+        fuente = pygame.font.SysFont("arialblack", 25)
+        # Load images
+        imagenDama = Imagen(f"img/{color}_dama.png")
+        imagenAlfil = Imagen(f"img/{color}_alfil.png")
+        imagenTorre = Imagen(f"img/{color}_torre.png")
+        imagenCaballo = Imagen(f"img/{color}_caballo.png")
+
+        # Create buttons
+        botonDama = Boton(180, 350, imagenDama.redimensionar(50,50), 1)
+        botonAlfil = Boton(280, 350, imagenAlfil.redimensionar(50,50), 1)
+        botonTorre = Boton(380, 350, imagenTorre.redimensionar(50,50), 1)
+        botonCaballo = Boton(480, 350, imagenCaballo.redimensionar(50,50), 1)
+
+        selected_piece = None
+
+        ejecucion = True
+        while ejecucion:
+            pygame.draw.rect(PANTALLA, (0, 0, 0), (150, 280, 400, 150))
+            text = fuente.render("¡Selecciona pieza de promocion de peon!", True, (255, 255, 255))
+            PANTALLA.blit(text, (180, 310))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    ejecucion = False
+                    pygame.quit()
+                    exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if botonDama.rectangulo.collidepoint(mouse_pos):
+                        selected_piece = "dama"
+                        ejecucion = False
+                    elif botonAlfil.rectangulo.collidepoint(mouse_pos):
+                        selected_piece = "alfil"
+                        ejecucion = False
+                    elif botonTorre.rectangulo.collidepoint(mouse_pos):
+                        selected_piece = "torre"
+                        ejecucion = False
+                    elif botonCaballo.rectangulo.collidepoint(mouse_pos):
+                        selected_piece = "caballo"
+                        ejecucion = False
+
+            botonDama.dibujar("",False)
+            botonAlfil.dibujar("",False)
+            botonTorre.dibujar("",False)
+            botonCaballo.dibujar("",False)
+
+            pygame.display.flip()
+
+        return f"{color}_{selected_piece}"
+    
     def moverPieza(self, posInicial: HexCoord, posFinal: HexCoord, desde: str) -> str:
         """Realiza el movimiento desde posicion inicial hasta la posicion final."""
         if posInicial == posFinal:
@@ -313,32 +369,40 @@ class Tablero:
                     # Si el peon es blanco:
                     if (piezaMovida[0] == "b"):
                         if ((posFinal.q) == 5 or (posFinal.r) == -5):
-                            self.__setitem__(posFinal, "b_dama")
+                            self.__setitem__(posFinal, self.dibujarMenuPromocion("b"))
                     # Si el peon es negro:
                     elif (piezaMovida[0] == "n"):
                         # Si hay 3 jugadores:
                         if (self.piezas.colores.endswith("r")):
                             if ((posFinal.p) == 5 or (posFinal.q) == -5):
-                                self.__setitem__(posFinal, "n_dama")
+                                self.__setitem__(posFinal, "n_dama" if desde=="Bot" else self.dibujarMenuPromocion("n"))
                         # Si hay 2 jugadores:
                         else:
                             if ((posFinal.q) == -5 or (posFinal.r) == 5):
-                                self.__setitem__(posFinal, "n_dama")
+                                self.__setitem__(posFinal, "n_dama" if desde=="Bot" else self.dibujarMenuPromocion("n"))
                     # Si el peon es rojo:
                     else:
                         if ((posFinal.p) == -5 or (posFinal.r) == 5):
-                            self.__setitem__(posFinal, "r_dama")
+                            self.__setitem__(posFinal, "r_dama" if desde=="Bot" else self.dibujarMenuPromocion("r"))
                 colorPieza = "blanco" if piezaMovida[0]=="b" else "negro" if piezaMovida[0]=="n" else "rojo"
                 if piezaMovida[2:].endswith("a"):
                     colorPieza = colorPieza[:-1]+"a"
                 return(piezaMovida[2:]+" "+colorPieza+" "+Tablero.encontrarCoordenadaReal(posInicial)+" a "+Tablero.encontrarCoordenadaReal(posFinal))
-    
+
     def elReyExiste(self, color: str) -> bool:
         """Comprobar si un rey del color especificado existe."""
         for celda in self:
             if celda.estado == f"{color}_rey":
                 return True
         return False
+
+    def contarReyes(self) -> int:
+        """Contar la cantidad de reyes en juego."""
+        contador:int = 0
+        for color in self.piezas.colores:
+            if self.elReyExiste(color):
+                contador += 1
+        return contador
 
     def elReyEstaEnJaque(self, color: str) -> Optional(HexCoord):
         """Comprobar si un rey del color especificado está en jaque en este momento."""

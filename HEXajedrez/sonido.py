@@ -1,6 +1,6 @@
 import pygame
 
-class Sonidos:
+class Sonido:
    
     """Una clase para poder reproducir sonidos dependiendo de si el usuario los ha desactivado o no."""
    
