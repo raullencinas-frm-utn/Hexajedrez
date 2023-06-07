@@ -1,6 +1,7 @@
 import pygame
 import random
 from typing import Optional
+from bot import Bot
 from tablero import Tablero
 from hexCoord import HexCoord
 from hexCelda import HexCelda
@@ -14,14 +15,14 @@ from musica import Musica
 
 class Juego:
 
-    def __init__(self, x, colores: str, ia: bool, continuar: bool, sonidoActivado: bool, musicaActivado: bool):
+    def __init__(self, x, colores: str, bot: bool, continuar: bool, sonidoActivado: bool, musicaActivado: bool):
 
         """Constructor de clase Juego."""
     
         if continuar:
             linea:str = open("../Registro de jugadas.txt","r").readline().split(" ")
             colores = linea[0]
-            ia = linea[1]=="True"
+            bot = linea[1]=="True"
         # Dimension del juego.
         self.AREA_JUEGO: PixelCoord = PixelCoord(x*0.63, x*0.63)
         # Dimension adicional necesaria para la GUI.
@@ -29,11 +30,15 @@ class Juego:
         self.ORIGEN_JUEGO: PixelCoord = self.AREA_JUEGO/2
         self.hex_radio: float = 35.5
         self.piezas = Piezas(colores)
-        self.ia = ia
+        self.adaptador: HexPixelAdaptador = HexPixelAdaptador(self.AREA_JUEGO, self.ORIGEN_JUEGO, self.hex_radio)
+        self.bot = bot
 
+        if bot:
+            self.botNegro = Bot("n","Medio",self.adaptador, colores.endswith("n"))
+            if colores.endswith("r"):
+                self.botRojo = Bot("r","Medio",self.adaptador, True)
 
         self.continuar = continuar
-        self.adaptador: HexPixelAdaptador = HexPixelAdaptador(self.AREA_JUEGO, self.ORIGEN_JUEGO, self.hex_radio)
         self.Musica = Musica("sonido/musica/")
         self.reproducir_sonidos = sonidoActivado
         self.reproducir_musica = musicaActivado
@@ -43,7 +48,12 @@ class Juego:
         Sonidos().sonidoIniciarJuego(self.reproducir_sonidos)
         """Iniciar el juego."""
 
-        pygame.init()
+        # pygame.init()
+
+        if self.bot:
+            self.botNegro.dificultad = dificultad
+            if self.piezas.colores.endswith("r"):
+                self.botRojo.dificultad = dificultad
 
         # Dimension del juego.
 
@@ -56,6 +66,7 @@ class Juego:
         # Fuente de AREA_ESTADO
 
         FUENTE = pygame.font.Font("fnt/8-Bit.TTF", 10)
+        FUENTE_MINUSCULA = pygame.font.SysFont("arialblack", 20)
 
         # Ancho y alto del juego.
 
@@ -94,15 +105,13 @@ class Juego:
 
         movimientosValidos: Optional[list[HexCoord]] = None
         self.juegoEjecutandose = juegoEjecutandose
-        self.turnoJugador: int = 0
+        self.turnoJugador: int = 0  # Describe de quien es el turno (0: Blanco, 1: Negro, 2: Rojo).
+        self.estadoRey: str = "" # Un mensaje sobre el estado de cualquiera de los reyes..
+        self.turnoTexto: str = "" # Describe de quien es el turno (0: Blanco, 1: Negro, 2: Rojo).
         
-        # Describe de quien es el turno (0: Blanco, 1: Negro, 2: Rojo).
+        hexInicialBot: list(Optional[HexCoord], Optional[HexCoord]) = [None, None]  # The `HexCoord` of the start of the AI's move.
+        hexFinalBot: list(Optional[HexCoord], Optional[HexCoord]) = [None, None]  # The `HexCoord` of the end of the AI's move.
         
-        estadoRey: str = ""
-        
-        # Un mensaje sobre el estado de cualquiera de los reyes..
-        
-        turnoTexto: str = "" 
         
         # Mensaje de qué lado es el turno.
         
@@ -151,30 +160,24 @@ class Juego:
             """Comprueba las jugadas realizadas y así determina de qué lado es el turno."""
 
             self.turnoJugador = HEX_TABLERO.turno % len(self.piezas.colores)
-            if self.turnoJugador < 1:
-                self.turnoTexto = "Blanco"
-            elif self.turnoJugador == 1:
-                self.turnoTexto = "Negro" 
-            else:
-                self.turnoTexto ="Rojo" 
-                
-            if HEX_TABLERO.elReyEstaEnJaque('b'):
-                if HEX_TABLERO.elReyEstaEnJaqueMate('b'):
-                    self.estadoRey = "Jaque Mate al Rey Blanco"
-                else:
-                    self.estadoRey = "Jaque al Rey Blanco"
-            elif HEX_TABLERO.elReyEstaEnJaque('n'):
-                if HEX_TABLERO.elReyEstaEnJaqueMate('n'):
-                    self.estadoRey = "Jaque Mate al Rey Negro"
-                else:
-                    self.estadoRey = "Jaque al Rey Negro"
-            elif HEX_TABLERO.elReyEstaEnJaque('r'):
-                if HEX_TABLERO.elReyEstaEnJaqueMate('r'):
-                    self.estadoRey = "Jaque Mate al Rey Rojo"
-                else:
-                    self.estadoRey = "Jaque al Rey Rojo"
-            else:
-                self.estadoRey = ""
+            self.turnoTexto = "Blanco" if self.turnoJugador == 0 else " Negro" if self.turnoJugador == 1 else "  Rojo" 
+            
+            if not HEX_TABLERO.elReyExiste(self.piezas.colores[self.turnoJugador]):
+                if self.bot and self.turnoJugador > 0:
+                    if self.turnoJugador == 1: 
+                        self.botNegro = None
+                    else: 
+                        self.botRojo = None
+                HEX_TABLERO.turno += 1
+                actualizaElTurno()
+                self.continuar = False
+                return
+            
+            if HEX_TABLERO.elReyEstaEnJaqueMate(self.piezas.colores[self.turnoJugador]):
+                HEX_TABLERO.turno += 1
+                actualizaElTurno()
+            
+            self.continuar = False
                 
         def escribeTexto(texto: str,tamanio: int, x: any, y: any, colorTexto):
 
@@ -238,9 +241,12 @@ class Juego:
                         color: str = piezaEnHexagono[0]
 
                         # Verificar los turnos.
-
-                        if not ((self.turnoJugador==0 and color == "b") or (self.turnoJugador==1 and color == "n") or (self.turnoJugador==2 and color == "r")):
-                            continue
+                        if self.bot:
+                            if not (self.turnoJugador == 0 and color == "b"):
+                                continue
+                        else:
+                            if not ((self.turnoJugador == 0 and color == "b") or (self.turnoJugador == 1 and color == "n") or (self.turnoJugador == 2 and color == "r")):
+                                continue
 
                         piezaSeleccionada = piezaEnHexagono
                         coordPiezaInicial = coordSeleccion
@@ -275,6 +281,16 @@ class Juego:
                 color: tuple[int, int, int] = HEX_COLORES[(
                     celda.coordenada.q - celda.coordenada.r) % 3]
                 dibujaHex(celda.coordenada, color, llenar=True)
+
+            # Pinta las celdas movidas por el Bot
+
+            for i in range(2):
+                if hexInicialBot[i] and hexFinalBot[i] is not None:
+                    dibujaHex(hexInicialBot[i], (200, 100, 100), True)
+            
+            # Si se está haciendo jaque, se pinta la celda del atacante.
+            if HEX_TABLERO.elReyEstaEnJaque(self.piezas.colores[self.turnoJugador])!=None:
+                dibujaHex(HEX_TABLERO.elReyEstaEnJaque(self.piezas.colores[self.turnoJugador]), (255, 10, 10), llenar=True)
 
             # Dibuja los colores segun el estado del movimiento. Verde: movimientos posibles, Rojo: capturar piezas, Azul: celda actual.
 
@@ -323,9 +339,32 @@ class Juego:
 
             # Describe el estado de Jaque:
 
-            escribeTexto(self.estadoRey, 15, (ANCHO_JUEGO+45+len(self.estadoRey)), 95,(255,255,255))
+            escribeTexto(self.estadoRey, 15, (ANCHO_JUEGO+10+len(self.estadoRey)), 95,(255,255,255))
             
             # Actualiza la pantalla.
 
             pygame.display.flip()
 
+            # Realiza los movimientos de un Bot.
+
+            if self.turnoJugador > 0 and self.bot:
+                ia = self.botNegro if self.turnoJugador == 1 else self.botRojo
+                
+                pygame.draw.rect(PANTALLA, (0, 0, 0), (150, 280, 400, 150))
+                text = FUENTE_MINUSCULA.render("La CPU está jugando, espere . . .", True, (255, 255, 255))
+                PANTALLA.blit(text, (350-text.get_width()/2, 350-text.get_height()))
+                
+                movimiento = ia.move(HEX_TABLERO)
+                
+                if movimiento != None:
+                    Sonidos().sonidoSoltarPieza(self.reproducir_sonidos)
+                    (hexInicialBot[self.turnoJugador-1], hexFinalBot[self.turnoJugador-1]), nuevoMov = movimiento
+                    if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
+                    actualizaElTurno()
+                    
+                else:
+                    HEX_TABLERO.turno += 1
+                    self.continuar = True
+                    actualizaElTurno()
+                
+                text = None

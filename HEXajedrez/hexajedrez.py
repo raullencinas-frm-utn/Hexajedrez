@@ -38,7 +38,7 @@ pantallaDificultad = False
 pantallaCreditos = False
 # Opciones:
 opciones = [False, "Medio", True, True]
-"""IA, dificultad, sonido, musica."""
+"""Bot, dificultad, sonido, musica."""
 
 # Funciones
 
