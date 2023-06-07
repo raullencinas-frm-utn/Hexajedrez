@@ -1,3 +1,5 @@
+import os
+from typing import Optional
 import pygame
 from boton import Boton
 from imagen import Imagen
@@ -28,19 +30,28 @@ BLANCO = (255, 255, 255)
 
 # Variables del menu
 opcionesDeJuego = False
-pantallaDePausa = False
+pantallaDePausa = [False]
+juegoEjecutandose = [True]
 pantallaDeOpciones = False
-pantallaAzul = False
+pantallaDificultad = False
+pantallaCreditos = False
+# Opciones:
+opciones = [False, "Medio", True, True]
+"""IA, dificultad, sonido, musica."""
 
 # Funciones
 
 
-def dibujaTexto(texto, tamanio, colorTexto, x, y):
+def dibujaTexto(texto, tamanio, colorTexto, x, y, posicion: Optional[str]):
     """ Genenera un texto en pantalla con la FUENTE y color de texto elegidos en la 
     posicion "x" e "y" de la pantalla con el texto elegido. """
     img = pygame.font.Font(
         "fnt/8-Bit.TTF", tamanio).render(texto, True, colorTexto)
+    if posicion == "Centrado":
+        anchoPantalla, altoPantalla = pygame.display.get_window_size()
+        x = (anchoPantalla/2) - (img.get_width()/2)
     pantalla.blit(img, (x, y))
+
 
 def draw_text_box(text, width, height):
     y = 700-height
@@ -62,17 +73,18 @@ def draw_text_box(text, width, height):
     lines.append(current_line)
 
     y += (height - len(lines) * (fuenteTam + 2.5)) // 2
-    
+
     for line in lines:
         text_surface = fuente.render(line, True, WHITE)
         text_rect = text_surface.get_rect()
         text_rect.centerx = x // 2
         text_rect.y = y
-        pygame.draw.rect(pantalla, (0, 0, 0), ((text_rect.x-2.5),(y-2.5),(text_rect.width+5),(text_rect.height+5)))
+        pygame.draw.rect(pantalla, (0, 0, 0), ((text_rect.x-2.5),
+                         (y-2.5), (text_rect.width+5), (text_rect.height+5)))
         pantalla.blit(text_surface, text_rect)
         y += fuenteTam + 5
-    
-    
+
+
 def comoJugar():
     y = ALTO_PANTALLA/2
     x = ANCHO_PANTALLA/2
@@ -117,7 +129,7 @@ def comoJugar():
         },
         "1vs2a": {
             "imagen": "img/como/p_1vs2.png",
-            "descripcion": "Esta variante de juego con 3 jugadores suma un nuevo nivel de complejidad y estrategia ya que los jugadores deberan considerar las interacciones con dos oponentes." 
+            "descripcion": "Esta variante de juego con 3 jugadores suma un nuevo nivel de complejidad y estrategia ya que los jugadores deberan considerar las interacciones con dos oponentes."
         },
 
         "peon": {
@@ -135,7 +147,7 @@ def comoJugar():
             "descripcion": "Cuando se encuentra en su posición inicial tiene la opción de avanzar dos hexágonos hacia adelante en lugar de uno. Esto le brinda la posibilidad de realizar un avance estratégico desde el inicio del juego."
         },
 
-        
+
         "peon2": {
             "imagen": "img/como/m_peon2.png",
             "descripcion": "Sin embargo si el peon ya se ha movido de su posicion inicial solo puede avanzar un hexágono hacia adelante en cada turno."
@@ -165,12 +177,12 @@ def comoJugar():
         "torre3": {
             "imagen": "img/como/m_torre.png",
             "descripcion": "Aprovecha la movilidad de la torre en el tablero hexagonal para controlar filas y columnas atacar a las piezas enemigas y establecer una defensa sólida."
-            },
+        },
 
         "torre4": {
             "imagen": "img/como/m_torre.png",
             "descripcion": "La torre es una pieza valiosa en Hexajedrez y su correcto uso puede marcar la diferencia en el desarrollo de la partida."
-            },
+        },
         "alfil": {
             "imagen": "img/como/m_alfil.png",
             "descripcion": "El alfil puede moverse a traves de los hexagonos que comparten los vértices del hexágono actual permitiendo un movimiento en diagonal y horizontal."
@@ -209,19 +221,19 @@ def comoJugar():
         "dama3": {
             "imagen": "img/como/m_dama.png",
             "descripcion": "Puede atacar desde diversas direcciones, controlar múltiples areas del tablero y ser un factor determinante en el desarrollo del juego. Aprovecha al máximo las capacidades estratégicas de la dama para obtener ventaja sobre tus oponentes en Hexajedrez."
-        }, 
+        },
 
         "rey": {
             "imagen": "img/como/m_rey.png",
             "descripcion": "El rey tiene la capacidad de moverse en todas las direcciones pero se limita a moverse solo un hexágono por turno."
-        }, 
-        
+        },
+
 
         "caballo": {
             "imagen": "img/como/m_caballo.png",
             "descripcion": "El caballo se mueve en dirección a los vertices de los hexágonos. Su movimiento especial consiste en trasladarse al hexágono que comparte lado con el hexágono que comparte vértice con el hexágono de partida"
         },
-        
+
         "caballo1": {
             "imagen": "img/como/m_caballo.png",
             "descripcion": "Puede moverse en cualquier dirección hacia estos hexágonos saltando sobre otras piezas en el proceso."
@@ -235,8 +247,8 @@ def comoJugar():
         "rey1": {
             "imagen": "img/como/m_rey.png",
             "descripcion": "El rey puede desplazarse verticalmente horizontalmente y en diagonal a través de los hexágonos adyacentes siempre avanzando un solo paso a la vez."
-        }, 
-        
+        },
+
         "rey2": {
             "imagen": "img/como/m_rey.png",
             "descripcion": "Su rango de movimiento es más limitado en comparación con la dama pero sigue siendo esencial para la supervivencia y estrategia del juego."
@@ -298,7 +310,7 @@ def comoJugar():
         "pausa3": {
             "imagen": "img/como/p_pausa.png",
             "descripcion": "Como Jugar: Al seleccionar esta opción se muestra una pantalla con las instrucciones y reglas básicas del juego proporcionando orientación adicional sobre como jugar Hexajedrez."
-            },
+        },
         "pausa4": {
             "imagen": "img/como/p_pausa.png",
             "descripcion": "Créditos: Al seleccionar esta opción se muestra una pantalla que reconoce a los integrantes y detalles del proyecto."
@@ -325,7 +337,7 @@ def comoJugar():
         },
         "opciones3": {
             "imagen": "img/como/p_opciones.png",
-            "descripcion": "Música: Permite al jugador activar o desactivar la música de fondo del juego. Si se activa la música se reproducirá una melodía de fondo durante la partida lo que puede agregar ambiente al juego. Si se desactiva la música el juego se jugará sin musica de fondo."        
+            "descripcion": "Música: Permite al jugador activar o desactivar la música de fondo del juego. Si se activa la música se reproducirá una melodía de fondo durante la partida lo que puede agregar ambiente al juego. Si se desactiva la música el juego se jugará sin musica de fondo."
         },
         "opciones4": {
             "imagen": "img/como/p_opciones.png",
@@ -350,13 +362,14 @@ def comoJugar():
     while running:
         for ayuda, info in comoJugar.items():
             pantalla.blit(pygame.transform.scale(pygame.image.load(
-                f"img/Fondo_Naranja.jpg").convert_alpha(), (1100, 715)), ( 0, -2.5))
-            pantalla.blit(
-            Imagen(info["imagen"]).obtenerImagen(), (
-                x - (Imagen(info["imagen"]).obtenerImagen().get_width()/2),(y-(Imagen(info["imagen"]).obtenerImagen().get_height()/2))))
+                f"img/Fondo_Naranja.jpg").convert_alpha(), (1100, 715)), (0, -2.5))
+            pantalla.blit(Imagen(info["imagen"]).obtenerImagen(), (x - (Imagen(info["imagen"]).obtenerImagen(
+            ).get_width()/2), (y-(Imagen(info["imagen"]).obtenerImagen().get_height()/2))))
             botonTitulo: str = "Finalizar" if esFin else "Continuar"
-            botonContinuar = Boton(840, 650, FUENTE.render(botonTitulo, True, (255, 255, 255)), .9)
-            pantalla.blit(Imagen("img/HEXajedrez.png").redimensionar(500,125), (310, 10))
+            botonContinuar = Boton(840, 650, FUENTE.render(
+                botonTitulo, True, (255, 255, 255)), .9)
+            pantalla.blit(
+                Imagen("img/HEXajedrez.png").redimensionar(500, 125), (310, 10))
             draw_text_box(info["descripcion"], 750, 150)
             siguiente = True
             while siguiente:
@@ -368,21 +381,90 @@ def comoJugar():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         mouse_pos = pygame.mouse.get_pos()
                         if botonContinuar.rectangulo.collidepoint(mouse_pos):
-                            
+
                             if (pagina == 54):
                                 esFin = True
                             siguiente = False
-                            pagina+=1 
+                            pagina += 1
                     botonContinuar.dibujar("")
                     pygame.display.flip()
         comoJugar = None
         running = False
+
+
+creditosDesplazamiento: int = 0  # te quiero lea! <3
+
+
+def creditos(creditosDesplazamiento):
+    creditosDesplazamiento -= .5
+    pantalla.blit(fondoCelesteImg.redimensionar(
+        ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
+    # Se dibujan los creditos en pantalla
+    pantalla.blit(hexajedrezImg.obtenerImagen(),
+                  (120, -80+creditosDesplazamiento))
+    dibujaTexto("Un programa de ajedrez hexagonal ", 20, BLANCO,
+                0, 130+creditosDesplazamiento, "Centrado")
+    dibujaTexto("realizado en Python", 20, BLANCO, 0,
+                160+creditosDesplazamiento, "Centrado")
+    dibujaTexto("En este trabajo presentamos el", 20, BLANCO,
+                0, 190+creditosDesplazamiento, "Centrado")
+    dibujaTexto("desarrollo de un juego de computadora ", 20,
+                BLANCO, 0, 220+creditosDesplazamiento, "Centrado")
+    dibujaTexto("llamado HEXajedrez que simula", 20, BLANCO,
+                0, 250+creditosDesplazamiento, "Centrado")
+    dibujaTexto("el Ajedrez Hexagonal de mesa que es ", 20,
+                BLANCO, 0, 280+creditosDesplazamiento, "Centrado")
+    dibujaTexto("una variante del famoso juego", 20, BLANCO,
+                0, 310+creditosDesplazamiento, "Centrado")
+    dibujaTexto("Ajedrez que se juega en un tablero", 20, BLANCO,
+                0, 340+creditosDesplazamiento, "Centrado")
+    dibujaTexto("de celdas hexagonales en lugar de cuadradas", 20,
+                BLANCO, 0, 370+creditosDesplazamiento, "Centrado")
+    dibujaTexto("El objetivo consiste en programar este juego", 20,
+                BLANCO, 0, 400+creditosDesplazamiento, "Centrado")
+    dibujaTexto("en Python sin conocimientos previos", 20,
+                BLANCO, 0, 430+creditosDesplazamiento, "Centrado")
+
+    dibujaTexto("Integrantes", 30, BLANCO, 0, 500 +
+                creditosDesplazamiento, "Centrado")
+    dibujaTexto("Espejo Mezzabotta Giuliano", 15, BLANCO,
+                0, 540+creditosDesplazamiento, "Centrado")
+    dibujaTexto("Lencinas Berenguer Raul Alejandro", 15, BLANCO,
+                0, 570+creditosDesplazamiento, "Centrado")
+    dibujaTexto("Maureira Ezequiel Jesus", 15, BLANCO, 0,
+                600+creditosDesplazamiento, "Centrado")
+    dibujaTexto("Santilli Elias Vicente", 15, BLANCO, 0,
+                630+creditosDesplazamiento, "Centrado")
+    dibujaTexto("Valdearenas Leandro Javier", 15, BLANCO,
+                0, 660+creditosDesplazamiento, "Centrado")
+    dibujaTexto("Varberde Thompson Francisco Alejandro", 15,
+                BLANCO, 0, 690+creditosDesplazamiento, "Centrado")
+    dibujaTexto("Detalles", 30, BLANCO, 0, 740 +
+                creditosDesplazamiento, "Centrado")
+    dibujaTexto("Docente Ing Carlos Rodriguez", 15, BLANCO,
+                0, 790+creditosDesplazamiento, "Centrado")
+    dibujaTexto("Metodologia de la Investigacion", 15, BLANCO,
+                0, 820+creditosDesplazamiento, "Centrado")
+    dibujaTexto("Universidad Tecnologica Nacional", 15, BLANCO,
+                0, 850+creditosDesplazamiento, "Centrado")
+    dibujaTexto("( Facultad Regional de Mendoza )", 15, BLANCO,
+                0, 880+creditosDesplazamiento, "Centrado")
+
+    if creditosDesplazamiento < -900:
+        # Se abandona la pantalla de creditos
+        creditosDesplazamiento = 0
+        pantallaCreditos = False
+
+    return creditosDesplazamiento
+
 
 # Imagenes del Menu
 unoContraUnoImg = Imagen("img/boton_uno_contra_uno.png")
 unoContraDosImg = Imagen("img/boton_uno_contra_dos.png")
 unoContraCpuImg = Imagen("img/boton_uno_contra_cpu.png")
 unoContraDosCpuImg = Imagen("img/boton_uno_contra_dos_cpu.png")
+activadoImg = Imagen("img/caja_activado.png")
+desactivadoImg = Imagen("img/caja_desactivado.png")
 
 # Titulo menu
 hexajedrezImg = Imagen("img/HEXajedrez.png")
@@ -392,7 +474,6 @@ fondoRojoImg = Imagen('img/Fondo_Rojo.png')
 fondoAmarilloImg = Imagen('img/Fondo_Amarillo.png')
 fondoCelesteImg = Imagen('img/Fondo_Celeste.png')
 fondoVerdeImg = Imagen('img/Fondo_Verde.jpg')
-pantallaAzulImg = Imagen('img/pantallaAzul.png')
 
 # Crear Botones
 botonUnoContraUno = Boton(0, 245, unoContraUnoImg.obtenerImagen(), 1)
@@ -403,13 +484,18 @@ botonContinuar = Boton(0, 245, FUENTE.render("Continuar", True, BLANCO), 1)
 botonOpciones = Boton(0, 295, FUENTE.render("Opciones", True, BLANCO), 1)
 botonComoJugar = Boton(0, 345, FUENTE.render("Como jugar", True, BLANCO), 1)
 botonCreditos = Boton(0, 395, FUENTE.render("Creditos", True, BLANCO), 1)
+botonMenuPrincipal = Boton(0, 410, FUENTE.render(
+    "Menu principal", True, BLANCO), 1)
 botonSalir = Boton(0, 445, FUENTE.render("Salir", True, BLANCO), 1)
 botonSonido = Boton(0, 245, FUENTE.render("Sonido", True, BLANCO), 1)
 botonMusica = Boton(0, 295, FUENTE.render("Musica", True, BLANCO), 1)
+botonSonidoCheckBox = Boton(660, 245, desactivadoImg.obtenerImagen(), 1)
+botonMusicaCheckBox = Boton(660, 295, desactivadoImg.obtenerImagen(), 1)
 botonDificultad = Boton(0, 345, FUENTE.render("Dificultad", True, BLANCO), 1)
+botonFacil = Boton(280, 345, FUENTE.render("Facil", True, BLANCO), 1)
+botonMedio = Boton(0, 345, FUENTE.render("Medio", True, BLANCO), 1)
+botonDificil = Boton(680, 345, FUENTE.render("Dificil", True, BLANCO), 1)
 botonVolver = Boton(0, 395, FUENTE.render("Volver", True, BLANCO), 1)
-botonVolverAzul = Boton(850, 600, FUENTE.render("Volver", True, BLANCO), 1)
-
 
 # Bucle de ejecucion
 ejecucion = True
@@ -418,73 +504,107 @@ while ejecucion:
     pantalla.fill(BLANCO)
 
     # PANTALLA DE PAUSA
-    if pantallaDePausa == True:
-        # se muestra el fondo celeste y se dibujan los botones
-        pantalla.blit(fondoCelesteImg.redimensionar(
-            ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
-        # se chequea que boton se presiona y se abre la ventana correspondiente
-        if botonContinuar.dibujar("Centrado"):
-            print("Continuar")
-        if botonOpciones.dibujar("Centrado"):
-            # Abre la pantalla de opciones
-            pantallaDeOpciones = True
-            print("Opciones")
-        if botonComoJugar.dibujar("Centrado"):
-            comoJugar()
-        if botonCreditos.dibujar("Centrado"):
-            print("Creditos")
-        if botonSalir.dibujar("Centrado"):
-            # Se abandona el bucle de ejecucion y cierra el programa
-            ejecucion = False
-            print("Salir")
-        # PANTALLA DE OPCIONES
-        if pantallaDeOpciones:
+    if pantallaDePausa[0] == True:
+        if pantallaCreditos:
+            creditosDesplazamiento = creditos(creditosDesplazamiento)
+            # PANTALLA DE OPCIONES
+        elif pantallaDeOpciones:
             # se muestra el fondo verde con los botones de opciones
             pantalla.blit(fondoVerdeImg.redimensionar(
                 ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
-            if botonSonido.dibujar("Centrado"):
-                print("Sonido")
-            if botonMusica.dibujar("Centrado"):
-                print("Musica")
-            if botonDificultad.dibujar("Centrado"):
-                print("Dificultad")
+
+            # se muestran las opciones de musica y sonido asi como sus cajitas de opciones.
+            if botonSonido.dibujar("Centrado") or botonSonidoCheckBox.dibujar(""):
+                opciones[2] = not opciones[2]
+            if botonMusica.dibujar("Centrado") or botonMusicaCheckBox.dibujar(""):
+                opciones[3] = not opciones[3]
+            pantalla.blit(activadoImg.obtenerImagen(
+            ) if opciones[2] else desactivadoImg.obtenerImagen(), (660, 245))
+            pantalla.blit(activadoImg.obtenerImagen(
+            ) if opciones[3] else desactivadoImg.obtenerImagen(), (660, 295))
+
+            if pantallaDificultad:
+                if botonFacil.dibujar(""):
+                    opciones[1] = "Facil"
+                    pantallaDificultad = False
+                if botonMedio.dibujar("Centrado"):
+                    opciones[1] = "Medio"
+                    pantallaDificultad = False
+                if botonDificil.dibujar(""):
+                    opciones[1] = "Dificil"
+                    pantallaDificultad = False
+            else:
+                if botonDificultad.dibujar("Centrado"):
+                    pantallaDificultad = True
+
             if botonVolver.dibujar("Centrado"):
                 # Se abandona la pantalla de opciones
                 pantallaDeOpciones = False
+
+        else:
+            # se muestra el fondo celeste y se dibujan los botones
+            pantalla.blit(fondoCelesteImg.redimensionar(
+                ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
+
+            # se chequea que boton se presiona y se abre la ventana correspondiente
+            if botonContinuar.dibujar("Centrado"):
+                pantallaDePausa[0] = False
+
+            if botonOpciones.dibujar("Centrado"):
+                # Abre la pantalla de opciones
+                pantallaDeOpciones = True
+
+            if botonComoJugar.dibujar("Centrado"):
+                # Se muestran las instrucciones de como jugar.
+                comoJugar()
+                pantallaDePausa[0] = False
+
+            if botonCreditos.dibujar("Centrado"):
+                creditos(creditosDesplazamiento)
+                creditosDesplazamiento = 600
+                pantallaCreditos = True
+
+            if botonMenuPrincipal.dibujar("Centrado"):
+                # Se vuelve el programa al menu inicial
+                juegoEjecutandose[0] = False
+                opcionesDeJuego = False
+                pantallaDePausa[0] = False
+
+            if botonSalir.dibujar("Centrado"):
+                # Se abandona el bucle de ejecucion y cierra el programa
+                ejecucion = False
+
     # PANTALLA DE MODOS DE JUEGO
     elif opcionesDeJuego == True:
         # Se selecciona el fondo mediante un condicional
-        if pantallaAzul == True:
-            pantalla.blit(pantallaAzulImg.redimensionar(
-                ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
-            if botonVolverAzul.dibujar(""):
-                pantallaAzul = False
-        else:
-            # Se dibuja el fondo amarillo
-            pantalla.blit(fondoAmarilloImg.redimensionar(
-                ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
-            # Se muestra el titulo
-            pantalla.blit(hexajedrezImg.obtenerImagen(), (100, 20))
-            # Se dibujan los botones de los modos de juego y al presionarlos cambia la pantalla
-            if botonUnoContraUno.dibujar("Centrado"):
-                Juego(ANCHO_PANTALLA, "bn").iniciar()
-            if botonUnoContraDos.dibujar("Centrado"):
-                pantallaAzul = True
-                print("inicia juego 1 contra 2")
-            if botonUnoContraCpu.dibujar("Centrado"):
-                pantallaAzul = True
-                print("inicia juego 1 contra CPU")
-            if botonUnoContraDosCpu.dibujar("Centrado"):
-                pantallaAzul = True
-                print("inicia juego 1 contra 2 CPU")
+
+        # Se dibuja el fondo amarillo
+        pantalla.blit(fondoAmarilloImg.redimensionar(
+            ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
+        # Se muestra el titulo
+        pantalla.blit(hexajedrezImg.obtenerImagen(), (100, 20))
+        # Se dibujan los botones de los modos de juego y al presionarlos cambia la pantalla
+        if botonUnoContraUno.dibujar("Centrado"):
+            Juego(ANCHO_PANTALLA, "bn").iniciar()
+        if botonUnoContraDos.dibujar("Centrado"):
+            pantallaAzul = True
+            print("inicia juego 1 contra 2")
+        if botonUnoContraCpu.dibujar("Centrado"):
+            pantallaAzul = True
+            print("inicia juego 1 contra CPU")
+        if botonUnoContraDosCpu.dibujar("Centrado"):
+            pantallaAzul = True
+            print("inicia juego 1 contra 2 CPU")
+
     # PANTALLA DE TITULO
     else:
         # se dibuja el fondo rojo
         pantalla.blit(fondoRojoImg.redimensionar(
             ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
         # se dibuja el texto en la pantalla
-        dibujaTexto("Presione ESPACIO para comenzar", 30, BLANCO, 130, 500)
-        dibujaTexto("o ESCAPE para mas opciones", 20, BLANCO, 295, 550)
+        dibujaTexto("Presione ESPACIO para comenzar",
+                    30, BLANCO, 130, 500, None)
+        dibujaTexto("o ESCAPE para mas opciones", 20, BLANCO, 295, 550, None)
 
     # Escucha eventos
     for evento in pygame.event.get():
@@ -515,11 +635,12 @@ while ejecucion:
                 opcionesDeJuego = True
             # si se presiona la tecla escape
             if evento.key == pygame.K_ESCAPE:
-                pantallaDePausa = not pantallaDePausa
+                juegoEjecutandose[0] = not juegoEjecutandose[0]
+                pantallaDePausa[0] = not pantallaDePausa[0]
                 pantallaDeOpciones = False
-
+                pantallaDificultad = False
+                pantallaCreditos = False
     # Actualiza la pantalla
     pygame.display.update()
 # Cierra el programa
 pygame.quit()
-# sleep(3) # Prueba para ver la ventana funcionar
