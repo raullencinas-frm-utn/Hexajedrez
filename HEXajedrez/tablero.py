@@ -51,6 +51,40 @@ class Tablero:
         elif type(item) is int:
             return item in self.celdas.keys()
 
+    def __str__(self) -> str:
+        FEN_dict = {
+            None: "xx",
+
+            "b_peon": "Pb",
+            "n_peon": "Pn",
+            "r_peon": "Pr",
+
+            "b_torre": "Tb",
+            "n_torre": "Tn",
+            "r_torre": "Tr",
+
+            "b_rey": "Rb",
+            "n_rey": "Rn",
+            "r_rey": "Rr",
+
+            "b_alfil": "Ab",
+            "n_alfil": "An",
+            "r_alfil": "Ar",
+
+            "b_dama": "Db",
+            "n_dama": "Dn",
+            "r_dama": "Dr",
+
+            "b_caballo": "Cb",
+            "n_caballo": "Cn",
+            "r_caballo": "Cr"
+        }
+
+        hash_str = ""
+        for i in range(91):
+            hash_str += FEN_dict[self[i]]
+        return hash_str
+
     @staticmethod
     def generarConRadio(radio: int, colores: str) -> Tablero:
         """Genera un mapa de hexagonos de un cierto radio."""
@@ -156,7 +190,7 @@ class Tablero:
                 # Si el rey se encuentra en jaque tras este movimiento:
                 if self.jaqueAlMoverse(coordPiezaInicial[0], posInicial, hexagonoActual):
                     # El peon, el caballo, y el rey solo pueden moverse una celda a la vez.
-                    if coordPiezaInicial[2:] in ["rey", "peon", "caballo"]:
+                    if coordPiezaInicial[2:] in ["rey", "peon", "caballo"] or self[hexagonoActual] is not None:
                         break
                     # El resto de piezas se mueven hasta los extremos del tablero.
                     else:
@@ -219,7 +253,7 @@ class Tablero:
                                     continue
                 
                     # Si el peon es rojo:
-                    elif coordPiezaInicial[0] == "r":
+                    else:
 
                         # Si es un ataque diagonal pero no hay nadie a quien atacar:
                         if diferencia in [HexCoord(-1, 1, 0), HexCoord(0, -1, 1)] and self[hexagonoActual] is None:
@@ -292,14 +326,21 @@ class Tablero:
                                 self.__setitem__(posFinal, "n_dama")
                     # Si el peon es rojo:
                     else:
-                        if ((posFinal.p) == -5 or (posFinal.q) == 5):
+                        if ((posFinal.p) == -5 or (posFinal.r) == 5):
                             self.__setitem__(posFinal, "r_dama")
                 colorPieza = "blanco" if piezaMovida[0]=="b" else "negro" if piezaMovida[0]=="n" else "rojo"
                 if piezaMovida[2:].endswith("a"):
                     colorPieza = colorPieza[:-1]+"a"
                 return(piezaMovida[2:]+" "+colorPieza+" "+Tablero.encontrarCoordenadaReal(posInicial)+" a "+Tablero.encontrarCoordenadaReal(posFinal))
-            
-    def elReyEstaEnJaque(self, color: str) -> bool:
+    
+    def elReyExiste(self, color: str) -> bool:
+        """Comprobar si un rey del color especificado existe."""
+        for celda in self:
+            if celda.estado == f"{color}_rey":
+                return True
+        return False
+
+    def elReyEstaEnJaque(self, color: str) -> Optional(HexCoord):
         """Comprobar si un rey del color especificado está en jaque en este momento."""
 
         # Debe encontrar la coordenada en la que se encuentra el rey, para verificar los movimientos enemigos.
@@ -317,6 +358,10 @@ class Tablero:
 
             # Si la pieza es del mismo color que el rey, es seguro que no lo amenaza.
             if celda.estado[0] == color:
+                continue
+
+            # Si esta pieza no tiene rey, no es una amenaza.
+            if not self.elReyExiste(celda.estado[0]):
                 continue
 
             # Esta pieza debe ser ahora sin duda una pieza enemiga, así que itera sobre sus "movimientos":
@@ -359,7 +404,7 @@ class Tablero:
 
                     # La jugada paso todos los jaques, asi que si amenaza al rey, el rey esta en jaque.
                     if hexagonoActual == coordenadaRey:
-                        return True
+                        return celda.coordenada
 
                     # Si esto es cierto, debe ser el caso de que es una pieza enemiga distinta del rey, por lo que no se puede recorrer a lo largo de este vector.
                     elif self[hexagonoActual] is not None:
@@ -371,15 +416,22 @@ class Tablero:
                         break
 
         # El rey no está en jaque.
-        return False
-    
+        return None
+
     def elReyEstaEnJaqueMate(self, color: str) -> bool:
         """Revisa si un rey del color especificado se encuentra en situacion de Jaque Mate."""
         # Si el rey se encuentra en Jaque:
-        if self.elReyEstaEnJaque(color):
+        if self.elReyEstaEnJaque(color)!=None:
             # Si ninguna pieza puede moverse significa que se encuentra en Jaque Mate:
-            if all(len(self.generarMovimientos(celda.coordenada)) == 1 for celda in self.celdasPiezasMismoColor(color)):
+            if self.elReyEstaAhogado(color):
                 return True
+        return False
+    
+    def elReyEstaAhogado(self, color: str) -> bool:
+        """Revisa si un rey del color especificado se encuentra en situacion de Rey Ahogado."""
+        # Si ninguna pieza puede moverse significa que se encuentra ahogado:
+        if all(len(self.generarMovimientos(celda.coordenada)) == 1 for celda in self.celdasPiezasMismoColor(color)):
+            return True
         return False
 
     def jaqueAlMoverse(self, color: str, posInicial: HexCoord, posFinal: HexCoord) -> bool:
@@ -387,7 +439,7 @@ class Tablero:
         respaldo: Optional[str] = self[posFinal]
 
         self.moverPieza(posInicial, posFinal,"")
-        estadoDeJaque: bool = self.elReyEstaEnJaque(color)
+        estadoDeJaque: bool = self.elReyEstaEnJaque(color)!=None
         self.moverPieza(posFinal, posInicial,"")
 
         self[posFinal] = respaldo
