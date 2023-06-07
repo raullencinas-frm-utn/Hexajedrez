@@ -540,9 +540,9 @@ while ejecucion:
 
             # se muestran las opciones de musica y sonido asi como sus cajitas de opciones.
 
-            if botonSonido.dibujar("Centrado", not opciones[2]) or botonSonidoCheckBox.dibujar("", not opciones[2]):
+            if botonSonido.dibujar("", not opciones[2]) or botonSonidoCheckBox.dibujar("", not opciones[2]):
                 opciones[2] = not opciones[2]
-            if botonMusica.dibujar("Centrado", opciones[2]) or botonMusicaCheckBox.dibujar("", opciones[2]):
+            if botonMusica.dibujar("", opciones[2]) or botonMusicaCheckBox.dibujar("", opciones[2]):
                 opciones[3] = not opciones[3]
             pantalla.blit(activadoImg.obtenerImagen(
             ) if opciones[2] else desactivadoImg.obtenerImagen(), (660, 395))
@@ -619,9 +619,18 @@ while ejecucion:
     # PANTALLA DE MODOS DE JUEGO
 
     elif opcionesDeJuego == True:
-
         # Se selecciona el fondo mediante un condicional
+        
+        # Se continua el juego si existe una partida.
+        if os.path.exists("../Registro de jugadas.txt") and os.path.exists("../Estado tablero.txt") :
+            archivo = open("../Registro de jugadas.txt","r")
+            if len(archivo.readlines())>1:
+                juegoEjecutandose[0] = True
+                Juego(ANCHO_PANTALLA, "", opciones[0], True, opciones[2], opciones[3]).iniciar(opciones[1], pantallaDePausa, juegoEjecutandose)
 
+            archivo.close()
+            archivo = None
+            
         # Se dibuja el fondo amarillo
 
         pantalla.blit(fondoAmarilloImg.redimensionar(
@@ -657,11 +666,13 @@ while ejecucion:
             ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
 
         # se dibuja el texto en la pantalla
-
-        dibujaTexto("Presione ESPACIO para comenzar",
-                    30, BLANCO, 130, 500, None)
-        dibujaTexto("o ESCAPE para mas opciones", 20, BLANCO, 295, 550, None)
-
+        if os.path.exists("../Registro de jugadas.txt") and len(open("../Registro de jugadas.txt","r").readlines())>1 and os.path.exists("../Estado tablero.txt"):
+            dibujaTexto("Hay una partida guardada", 30, (255, 255, 70), 200, 490, None)
+            dibujaTexto("Presione ESPACIO para continuar", 20, BLANCO, 245, 540, None)
+            dibujaTexto("o N para comenzar nuevo juego", 20, BLANCO, 260, 580, None)
+        else:
+            dibujaTexto("Presione ESPACIO para comenzar", 30, BLANCO, 130, 500, None)
+            dibujaTexto("o ESCAPE para mas opciones", 20, BLANCO, 295, 550, None)
     # Escucha eventos
 
     for evento in pygame.event.get():
@@ -708,6 +719,12 @@ while ejecucion:
                 pantallaDeOpciones = False
                 pantallaDificultad = False
                 pantallaCreditos = False
+            if evento.key == pygame.K_n:
+                if os.path.exists("../Registro de jugadas.txt"):
+                    os.remove("../Registro de jugadas.txt")
+                if os.path.exists("../Estado tablero.txt"):
+                    os.remove("../Estado tablero.txt")
+                opcionesDeJuego = True
 
     # Actualiza la pantalla
 
