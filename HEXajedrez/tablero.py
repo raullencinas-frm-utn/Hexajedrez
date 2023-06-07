@@ -6,7 +6,7 @@ import string
 from typing import Optional
 from typing import Union
 from hexCoord import HexCoord
-from hexCasilla import HexCasilla
+from hexCelda import HexCelda
 from piezas import Piezas
 
 
@@ -16,40 +16,40 @@ class Tablero:
     Proporciona metodos para hacer movimientos, generar tableros comunes, movimientos de una coordenada y detectar Jaque y Jaque Mate.
     """
 
-    def __init__(self, colores: str, casillas=None):
+    def __init__(self, colores: str, celdas=None):
         """Constructor del tablero."""
-        if casillas is None:
-            casillas = dict()
-        self.casillas: dict[int, HexCasilla] = casillas
-        self.coordenadasACasillas: dict[HexCoord, int] = dict()
+        if celdas is None:
+            celdas = dict()
+        self.celdas: dict[int, HexCelda] = celdas
+        self.coordenadasACeldas: dict[HexCoord, int] = dict()
         self.piezas = Piezas(colores)
         self.movimientos = self.piezas.movimientos()
         self.turno: int = 0
 
     def __iter__(self):
         """Regresa un iterador de las coordenadas sobre el mapa."""
-        return iter(self.casillas.values())
+        return iter(self.celdas.values())
 
     def __getitem__(self, item: Union[int, HexCoord]) -> Optional[str]:
         """Busca la coordenada en un mapa y retorna el estado de una celda."""
         if type(item) is HexCoord:
-            return self.casillas[self.coordenadasACasillas[item]].estado
+            return self.celdas[self.coordenadasACeldas[item]].estado
         elif type(item) is int:
-            return self.casillas[item].estado
+            return self.celdas[item].estado
 
     def __setitem__(self, clave: Union[int, HexCoord], valor: Optional[str]):
         """Ingresa el estado de una celda en un mapa a partir de una coordenada."""
         if type(clave) is HexCoord:
-            self.casillas[self.coordenadasACasillas[clave]].estado = valor
+            self.celdas[self.coordenadasACeldas[clave]].estado = valor
         elif type(clave) is int:
-            self.casillas[clave].estado = valor
+            self.celdas[clave].estado = valor
 
     def __contains__(self, item: HexCoord) -> bool:
         """Verifica que la coordenada se encuentra en el mapa."""
         if type(item) is HexCoord:
-            return item in self.coordenadasACasillas.keys()
+            return item in self.coordenadasACeldas.keys()
         elif type(item) is int:
-            return item in self.casillas.keys()
+            return item in self.celdas.keys()
 
     @staticmethod
     def generarConRadio(radio: int, colores: str) -> Tablero:
@@ -61,8 +61,8 @@ class Tablero:
                 for r in range(-radio, radio + 1):
                     if p + q + r == 0:
                         coord = HexCoord(p, q, r)
-                        tablero.coordenadasACasillas[copy.deepcopy(coord)] = i
-                        tablero.casillas[i] = HexCasilla(coord)
+                        tablero.coordenadasACeldas[copy.deepcopy(coord)] = i
+                        tablero.celdas[i] = HexCelda(coord)
                         i += 1
         return tablero
 
@@ -171,17 +171,11 @@ class Tablero:
                         if diferencia in [HexCoord(-1, 1, 0), HexCoord(1, 0, -1)] and self[hexagonoActual] is None:
                             break
                         
-                        if diferencia in [HexCoord(-1, 1, 0), HexCoord(1, 0, -1)] and self[hexagonoActual] is not None:
-                            movimientosValidos.append(hexagonoActual)
-                            break
-
-                        if self[hexagonoActual] is not None:
-                            break
-                       
-                        if diferencia == HexCoord(0, 1, -1) and self[hexagonoActual] is not None:
+                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        if diferencia in [HexCoord(0, 1, -1), HexCoord(0, 2, -2)] and self[hexagonoActual] is not None:
                             break
                         
-                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        # Si se encuentra en la posicion inicial de un peon, se permite mover una celda adicional:
                         if diferencia == HexCoord(0, 1, -1) and self[hexagonoActual] is None:
                             if (posInicial.p, posInicial.q, posInicial.r) in ([(-n, -2, n + 2) for n in range(4)] + [(n, -n - 2, 2) for n in range(4)]) and self[hexagonoActual] is None:
                                 movimientosValidos.append(hexagonoActual)
@@ -197,16 +191,11 @@ class Tablero:
                             if diferencia in [HexCoord(0, -1, 1), HexCoord(1, 0, -1)] and self[hexagonoActual] is None:
                                 break
                             
-                            if diferencia in [HexCoord(0, -1, 1), HexCoord(1, 0, -1)] and self[hexagonoActual] is not None:
-                                movimientosValidos.append(hexagonoActual)
+                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            if diferencia in [HexCoord(1, -1, 0), HexCoord(2, -2, 0)] and self[hexagonoActual] is not None:
                                 break
                             
-                            if self[hexagonoActual] is not None:
-                                    break
-
-                            if diferencia == HexCoord(1, -1, 0) and self[hexagonoActual] is not None:
-                                break
-                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            # Si se encuentra en la posicion inicial de un peon, se permite mover una celda adicional:
                             if diferencia == HexCoord(1, -1, 0) and self[hexagonoActual] is None:
                                 if (posInicial.p, posInicial.q, posInicial.r) in ([(-2-n, 2, +n ) for n in range(4)] + [(-2, 2 +n , -n) for n in range(4)]):
                                     movimientosValidos.append(hexagonoActual)
@@ -218,21 +207,13 @@ class Tablero:
                             # Si es un ataque diagonal pero no hay nadie a quien atacar:
                             if diferencia in [HexCoord(1, -1, 0), HexCoord(-1, 0, 1)] and self[hexagonoActual] is None:
                                 break
-                            
-                            if diferencia in [HexCoord(1, -1, 0), HexCoord(-1, 0, 1)] and self[hexagonoActual] is not None:
-                                movimientosValidos.append(hexagonoActual)
-                                break
-                            
-                            if self[hexagonoActual] is not None:
-                                    break
                                 
                             # Si es un movimiento hacia delante pero hay una pieza en el camino:
-                            if diferencia == HexCoord(0, -1, 1) and self[hexagonoActual] is not None:
+                            if diferencia in [HexCoord(0, -1, 1), HexCoord(0, -2, 2)] and self[hexagonoActual] is not None:
                                 break
                             
-                            # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                            # Si se encuentra en la posicion inicial de un peon, se permite mover una celda adicional:
                             if diferencia == HexCoord(0, -1, 1) and self[hexagonoActual] is None:
-                                
                                 if (posInicial.p, posInicial.q, posInicial.r) in ([(-n, 2+n, -2 ) for n in range(4)] + [(n, 2 , -2-n) for n in range(4)]):
                                     movimientosValidos.append(hexagonoActual)
                                     continue
@@ -244,16 +225,11 @@ class Tablero:
                         if diferencia in [HexCoord(-1, 1, 0), HexCoord(0, -1, 1)] and self[hexagonoActual] is None:
                             break
                         
-                        if diferencia in [HexCoord(-1, 1, 0), HexCoord(0, -1, 1)] and self[hexagonoActual] is not None:
-                            movimientosValidos.append(hexagonoActual)
-                            break
-
-                        if self[hexagonoActual] is not None:
+                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        if diferencia in [HexCoord(-1, 0, 1), HexCoord(-2, 0, 2)] and self[hexagonoActual] is not None:
                                     break
                         
-                        if diferencia == HexCoord(-1, 0, 1) and self[hexagonoActual] is not None:
-                                    break
-                        # Si es un movimiento hacia delante pero hay una pieza en el camino:
+                        # Si se encuentra en la posicion inicial de un peon, se permite mover una celda adicional:
                         if diferencia == HexCoord(-1, 0, 1) and self[hexagonoActual] is None:
                             if (posInicial.p, posInicial.q, posInicial.r) in ([( 2, +n,-2-n ) for n in range(4)] + [( 2 +n, -n, -2) for n in range(4)]):
                                 movimientosValidos.append(hexagonoActual)
@@ -272,20 +248,20 @@ class Tablero:
         
         return movimientosValidos
     
-    def casillasPiezasMismoColor(self, color: str) -> list[HexCasilla]:
-        """Devuelve todas las casillas que tengan una pieza de un color especifico."""
-        celdasValidas: list[HexCasilla] = []
-        for casilla in self:
-            if casilla.estado is not None and casilla.estado.startswith(color):
-                celdasValidas.append(casilla)
+    def celdasPiezasMismoColor(self, color: str) -> list[HexCelda]:
+        """Devuelve todas las celdas que tengan una pieza de un color especifico."""
+        celdasValidas: list[HexCelda] = []
+        for celda in self:
+            if celda.estado is not None and celda.estado.startswith(color):
+                celdasValidas.append(celda)
         return celdasValidas
 
     def movimientosPorColor(self, color: str) -> tuple[HexCoord, HexCoord]:
         """Devuelve todos los movimientos de las piezas de un color especifico."""
-        for casilla in self.casillasPiezasMismoColor(color):
-            for coordenada in self.generarMovimientos(casilla.coordenada):
-                if casilla.coordenada != coordenada:
-                    yield casilla.coordenada, coordenada
+        for celda in self.celdasPiezasMismoColor(color):
+            for coordenada in self.generarMovimientos(celda.coordenada):
+                if celda.coordenada != coordenada:
+                    yield celda.coordenada, coordenada
 
     def moverPieza(self, posInicial: HexCoord, posFinal: HexCoord, desde: str) -> str:
         """Realiza el movimiento desde posicion inicial hasta la posicion final."""
@@ -328,26 +304,26 @@ class Tablero:
 
         # Debe encontrar la coordenada en la que se encuentra el rey, para verificar los movimientos enemigos.
         coordenadaRey: Optional[HexCoord] = None
-        for casilla in self:
-            if casilla.estado == f"{color}_rey":
-                coordenadaRey = casilla.coordenada
+        for celda in self:
+            if celda.estado == f"{color}_rey":
+                coordenadaRey = celda.coordenada
 
         # Iterar sobre el diccionario de celdas, sobre los valores del par de claves.
-        for coordenada, casilla in self.casillas.items():
+        for coordenada, celda in self.celdas.items():
 
-            # Si no hay nada en esa casilla, no hay necesidad de comprobar si puede amenazar al rey.
-            if casilla.estado is None:
+            # Si no hay nada en esa celda, no hay necesidad de comprobar si puede amenazar al rey.
+            if celda.estado is None:
                 continue
 
             # Si la pieza es del mismo color que el rey, es seguro que no lo amenaza.
-            if casilla.estado[0] == color:
+            if celda.estado[0] == color:
                 continue
 
             # Esta pieza debe ser ahora sin duda una pieza enemiga, así que itera sobre sus "movimientos":
-            for orientacion in self.movimientos[casilla.estado]:
+            for orientacion in self.movimientos[celda.estado]:
                 # Convierta la tupla de 3 en un `HexCoord` para aprovechar sus operadores y métodos sobrecargados.
                 orientacion: HexCoord = HexCoord(*orientacion)
-                hexagonoActual: HexCoord = casilla.coordenada
+                hexagonoActual: HexCoord = celda.coordenada
 
                 while True:
 
@@ -359,25 +335,25 @@ class Tablero:
                         break
 
                     # Si la pieza en la coordenada es del mismo color que la indicada, deja de moverse a lo largo de esta línea.
-                    if self[hexagonoActual] is not None and self[hexagonoActual][0] == casilla.estado[0]:
+                    if self[hexagonoActual] is not None and self[hexagonoActual][0] == celda.estado[0]:
                         break
 
                     # Manejo especial de las peculiaridades de las piezas de peon
-                    if casilla.estado.endswith("peon"):
-                        offset: HexCoord = hexagonoActual - casilla.coordenada
+                    if celda.estado.endswith("peon"):
+                        offset: HexCoord = hexagonoActual - celda.coordenada
 
                         # Comprobar que el desplazamiento es un ataque, ya que los peones no pueden amenazar a los que se encuentran adelante.
-                        if casilla.estado[0] == "b":
+                        if celda.estado[0] == "b":
                             if offset not in [HexCoord(-1, 1, 0), HexCoord(1, 0, -1)]:
                                 break
-                        elif casilla.estado[0] == "n":
+                        elif celda.estado[0] == "n":
                             if self.piezas.colores.endswith("r"):
                                 if offset not in (HexCoord(0, -1, 1), HexCoord(1, 0, -1)):
                                     break
                             else:
                                 if offset not in (HexCoord(1, -1, 0), HexCoord(-1, 0, 1)):
                                     break
-                        elif casilla.estado[0] == "r":
+                        elif celda.estado[0] == "r":
                             if offset not in (HexCoord(-1, 1, 0), HexCoord(0, -1, 1)):
                                 break
 
@@ -391,7 +367,7 @@ class Tablero:
 
                     #Rey, Peón y Caballo sólo pueden moverse a lo largo de sus movimientos una vez.
                     #Se ejecutará en el primer ciclo de cualquier vector, deteniendo el movimientto para ellos.
-                    elif casilla.estado[2:] in ["rey", "peon", "caballo"]:
+                    elif celda.estado[2:] in ["rey", "peon", "caballo"]:
                         break
 
         # El rey no está en jaque.
@@ -402,7 +378,7 @@ class Tablero:
         # Si el rey se encuentra en Jaque:
         if self.elReyEstaEnJaque(color):
             # Si ninguna pieza puede moverse significa que se encuentra en Jaque Mate:
-            if all(len(self.generarMovimientos(celda.coordenada)) == 1 for celda in self.casillasPiezasMismoColor(color)):
+            if all(len(self.generarMovimientos(celda.coordenada)) == 1 for celda in self.celdasPiezasMismoColor(color)):
                 return True
         return False
 
