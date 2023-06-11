@@ -23,7 +23,6 @@ class Boton:
         # Obtenemos posicion del mouse
     
         pos = pygame.mouse.get_pos()
-
         # Revisar que el mouse se encuentre encima del boton y haga click
 
         if self.rectangulo.collidepoint(pos):
@@ -34,7 +33,6 @@ class Boton:
                 accion = True
 
         # Se suelta el boton del mouse
-
         if pygame.mouse.get_pressed()[0] == 0:
             self.seleccionado = False
 
@@ -49,7 +47,6 @@ class Boton:
         self.imagen.set_alpha(transparencia)
 
         # Dibujar boton en pantalla
-
         pygame.display.get_surface().blit(self.imagen, (self.rectangulo.x, self.rectangulo.y))
 
         return accion

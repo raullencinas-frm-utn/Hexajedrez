@@ -101,7 +101,6 @@ class Bot:
             capa.blit(copia_superficie,(0,0))
             capa.blit(imagenBot,((x-30), (y-30)))
             pygame.display.get_surface().blit(capa, (0, 0))
-
             pygame.display.flip()
             reloj.tick(120)
         return (mejorMovimiento, registro)
@@ -210,6 +209,7 @@ class Bot:
         
         if estaMaximizando:
             movimientos = HEX_TABLERO.movimientosPorColor(self.color)
+        
         else:
             movimientos = HEX_TABLERO.movimientosPorColor("b")
             if HEX_TABLERO.piezas.colores.endswith("r"):

@@ -1,0 +1,3 @@
+bn False 2
+peon blanco F4 a F6
+peon negro F8 a F7

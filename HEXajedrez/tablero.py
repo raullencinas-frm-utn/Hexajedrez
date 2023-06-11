@@ -304,20 +304,19 @@ class Tablero:
         """Dibuja el menú de promoción y devuelve la pieza seleccionada."""
         PANTALLA = pygame.display.get_surface()
         fuente = pygame.font.SysFont("arialblack", 25)
-        # Load images
+
         imagenDama = Imagen(f"img/{color}_dama.png")
         imagenAlfil = Imagen(f"img/{color}_alfil.png")
         imagenTorre = Imagen(f"img/{color}_torre.png")
         imagenCaballo = Imagen(f"img/{color}_caballo.png")
 
-        # Create buttons
+        # Se crean los botones.
         botonDama = Boton(180, 350, imagenDama.redimensionar(50,50), 1)
         botonAlfil = Boton(280, 350, imagenAlfil.redimensionar(50,50), 1)
         botonTorre = Boton(380, 350, imagenTorre.redimensionar(50,50), 1)
         botonCaballo = Boton(480, 350, imagenCaballo.redimensionar(50,50), 1)
 
         selected_piece = None
-
         ejecucion = True
         while ejecucion:
             pygame.draw.rect(PANTALLA, (0, 0, 0), (150, 280, 400, 150))

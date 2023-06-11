@@ -24,7 +24,7 @@ class Juego:
         """Constructor de clase Juego."""
         if continuar:
 
-            linea:str = open("../Registro de jugadas.txt","r").readline().split(" ")
+            linea:str = open("registro/Registro de jugadas.txt","r").readline().split(" ")
 
             colores = linea[0]
 
@@ -64,15 +64,10 @@ class Juego:
 
         # Dimension del juego.
 
-
         AREA_JUEGO = self.AREA_JUEGO
-
-
+        
         # Dimension adicional necesaria para la GUI.
-
-
         AREA_ESTADO = self.AREA_ESTADO
-
 
         # Fuente de AREA_ESTADO
 
@@ -91,15 +86,12 @@ class Juego:
 
 
         # Origen central del juego.
-
-        ORIGEN_JUEGO: self.ORIGEN_JUEGO
-
+        ORIGEN_JUEGO = self.ORIGEN_JUEGO
+        
         # Pantalla del juego.
-
         PANTALLA = pygame.display.get_surface()
 
         # Tablero de juego.
-
         HEX_TABLERO: Tablero = Tablero.generarMcCooey(self.piezas.colores)
 
         # El radio de un hexagono individual en pantalla, en pixeles.
@@ -107,62 +99,35 @@ class Juego:
         HEX_RADIO: self.hexagonoRadio
 
         # Lista de los colores de las celdas.
-
-
-        HEX_COLORES: list[tuple] = [
-
-            (60, 120, 60), (40, 40, 200), (184, 40, 50)]
-
+        HEX_COLORES: list[tuple] = [(60, 120, 60), (40, 40, 200), (184, 40, 50)]
 
         # Adapta los hexagonos a pixeles.
-
         ADAPTADOR: HexPixelAdaptador = self.adaptador
-
         AREA_PIEZA: PixelCoord = PixelCoord(60, 60) / 2
 
 
         piezas = self.piezas
-
         imagenesDePiezas = piezas.piezasImagenes(piezas.colores)
 
 
         # El estado de la pieza seleccionada.
-
-
         piezaSeleccionada: Optional[HexCoord] = None
 
-
         # Cuando se elige una pieza guarda la coordena inicial de la pieza tomada.
-
-
         coordPiezaInicial: Optional[HexCoord] = None
 
-
         # Guarda los movimientos validos de la pieza tomada.
-
-
         movimientosValidos: Optional[list[HexCoord]] = None
-
         self.juegoEjecutandose = juegoEjecutandose
-
         self.turnoJugador: int = 0  # Describe de quien es el turno (0: Blanco, 1: Negro, 2: Rojo).
-
         self.estadoRey: str = "" # Un mensaje sobre el estado de cualquiera de los reyes..
-
         self.turnoTexto: str = "" # Describe de quien es el turno (0: Blanco, 1: Negro, 2: Rojo).
-        
-
+    
         hexInicialBot: list(Optional[HexCoord], Optional[HexCoord]) = [None, None]  # The `HexCoord` of the start of the AI's move.
-
         hexFinalBot: list(Optional[HexCoord], Optional[HexCoord]) = [None, None]  # The `HexCoord` of the end of the AI's move.
         
-        
-
         # Mensaje de qué lado es el turno.
-        
-
         registroMovimientos = [] 
-
         sePuedeDeshacer = False
 
 
@@ -187,59 +152,31 @@ class Juego:
 
 
         @staticmethod
-
         def actualizarRegistro(movimiento, registro) -> bool:
-
-
             """Se actualiza el historial de movimientos con el movimiento que se pasa como parametro."""
-
-
             if movimiento != None:
-
                 registro.append(movimiento)
 
             return len(registro) > 15
 
-
         def guardarJuego():
-
             """Cierra el programa y guarda el registro de jugadas en un archivo de texto."""
-
-            archivo = open("../Registro de jugadas.txt","w")
-
+            archivo = open("registro/Registro de jugadas.txt","w")
             archivo.write(HEX_TABLERO.piezas.colores+" "+str(self.bot)+" "+str(HEX_TABLERO.turno)+"\n")
-
             for linea in registroMovimientos:
-
                 archivo.write(linea+"\n")
-                
-
             archivo.close()
-
             archivo = None
-            
-
-            archivo = open("../Estado tablero.txt","w")
-
+            archivo = open("registro/Estado tablero.txt","w")
             for celdaElegida in HEX_TABLERO:
-
                 if celdaElegida.estado!=None:
-
                     archivo.write(celdaElegida.coordenada.__str__()+" "+str(celdaElegida.estado)+"\n")
-
             archivo.close()
-
             archivo = None
-
 
         def dibujaHex(coordenada: HexCoord, color: tuple, llenar=False):
-
-
             """Dibuja un hexagono en la pantalla."""
-
-
             pygame.draw.polygon(PANTALLA, color, ADAPTADOR.getVertices(
-
                 coordenada), 0 if llenar else 3)
 
 
@@ -247,13 +184,8 @@ class Juego:
 
 
             """Dibuja una pieza en pantalla segun la celd ingresada."""
-
-
             pixelCoords: PixelCoord = ADAPTADOR.hexAPixel(celda.coordenada)
-
-
             if celda.estado is not None:
-
                 if celda.coordenada == coordPiezaInicial:
                     return
 
@@ -263,55 +195,39 @@ class Juego:
                 
 
         def evaluarEstadoDelRey():
-
             if HEX_TABLERO.elReyEstaEnJaque(HEX_TABLERO.piezas.colores[self.turnoJugador])!=None:
 
                 if HEX_TABLERO.elReyEstaEnJaqueMate(HEX_TABLERO.piezas.colores[self.turnoJugador]):
 
                     self.estadoRey = "Jaque Mate al Rey "+self.turnoTexto.replace(" ","")
-
                     mensajeDeEstadoDelRey(self, True)
                     return
                     
 
                 else:
-
                     self.estadoRey = "Jaque al Rey "+self.turnoTexto.replace(" ","")
-
                     mensajeDeEstadoDelRey(self, False)
                     return
                 
 
             elif HEX_TABLERO.elReyEstaAhogado(HEX_TABLERO.piezas.colores[self.turnoJugador]):
-
                 self.estadoRey = "Rey "+self.turnoTexto.replace(" ","")+" ahogado"
-
                 mensajeDeEstadoDelRey(self, True)
                 return
             
 
             self.estadoRey = ""
         
-
         def mensajeDeEstadoDelRey(self, mate: bool):
-
             """Dibuja una alerta que describe el estado de Jaque del rey del jugador actual."""
-            
-
             # Previene al mensaje de aparecer al continuar el juego.
-
             if self.continuar:
                 return
-            
-
             # Si se hace un jaque al Bot no se muestra.
-
             if not mate and (self.bot) and (self.turnoJugador > 0):
                 return
             
-
-            # Crear botón
-
+            # Si hay como mucho dos reyes y un rey se encuentra en jaque mate o ahogado, se finaliza el juego.
             esFin: bool = mate and HEX_TABLERO.contarReyes() <= 2
 
             botonTitulo: str = "Finalizar" if esFin else "Continuar"
@@ -330,15 +246,11 @@ class Juego:
                 PANTALLA.blit(text, (350-text.get_width()/2, 330))
 
                 for event in pygame.event.get():
-
                     if event.type == pygame.QUIT:
-
                         ejecucion = False
-
                         pygame.quit()
-
                         exit()
-
+                  
 
                     if event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -350,9 +262,9 @@ class Juego:
 
                                 juegoEjecutandose[0] = False
 
-                                if os.path.exists("../Estado tablero.txt"):
+                                if os.path.exists("registro/Estado tablero.txt"):
 
-                                    os.remove("../Estado tablero.txt")
+                                    os.remove("registro/Estado tablero.txt")
 
                             ejecucion = False
                         
@@ -364,16 +276,9 @@ class Juego:
                 
 
         def actualizaElTurno():
-
-
             """Comprueba las jugadas realizadas y así determina de qué lado es el turno."""
-
-
             self.turnoJugador = HEX_TABLERO.turno % len(self.piezas.colores)
-
             self.turnoTexto = "Blanco" if self.turnoJugador == 0 else " Negro" if self.turnoJugador == 1 else "  Rojo" 
-            
-
             if not HEX_TABLERO.elReyExiste(self.piezas.colores[self.turnoJugador]):
 
                 if self.bot:
@@ -396,23 +301,16 @@ class Juego:
 
 
                 HEX_TABLERO.turno += 1
-
                 actualizaElTurno()
-
                 self.continuar = False
                 return
-            
-
             evaluarEstadoDelRey()
 
 
             if HEX_TABLERO.elReyEstaEnJaqueMate(self.piezas.colores[self.turnoJugador]):
 
                 HEX_TABLERO.turno += 1
-
                 actualizaElTurno()
-            
-
             self.continuar = False
                 
 
@@ -420,7 +318,6 @@ class Juego:
 
 
             """ Genenera un texto en pantalla con la FUENTE y color de texto elegidos en la 
-
             posicion "x" e "y" de la pantalla con el texto elegido. """
 
 
@@ -430,54 +327,28 @@ class Juego:
 
 
         def continuarJuego():
-
             """Ejecuta las jugadas guardadas en el archivo de texto de registros para devolver el programa al estado en el que se lo dejó."""
-
-            if os.path.exists("../Registro de jugadas.txt") and os.path.exists("../Estado tablero.txt"):
-
-                archivo = open("../Registro de jugadas.txt","r")
-
+            if os.path.exists("registro/Registro de jugadas.txt") and os.path.exists("registro/Estado tablero.txt"):
+                archivo = open("registro/Registro de jugadas.txt","r")
                 for linea in archivo.readlines():
-
                     palabras:str = linea.split(" ")
-
                     if len(palabras) < 4:
-
                         HEX_TABLERO.turno = int(palabras[2])
                         continue
-
                     else:
-
                         if actualizarRegistro(linea[:-1], registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
-
                 archivo.close()
-                
-
                 for celdaElegida in HEX_TABLERO:
-
                     celdaElegida.estado = None
-                
-
-                archivo = open("../Estado tablero.txt","r")
-
+                archivo = open("registro/Estado tablero.txt","r")
                 for linea in archivo.readlines():
-
                     palabras:str = linea.split(" ")
-
                     HEX_TABLERO.__setitem__(HexCoord(float(palabras[0][1:-1]),float(palabras[1][:-1]),float(palabras[2][:-1])), palabras[3][:-1])
-
                 archivo.close()
-
                 archivo = None
-        
-
 
         if self.continuar: continuarJuego()
-        
-
         actualizaElTurno()
-        
-
         self.continuar = False
 
 
@@ -503,59 +374,38 @@ class Juego:
                 
 
                 if evento.type == pygame.QUIT:
-
                     guardarJuego()
-
                     pygame.quit()
-
                     exit()
 
                 if evento.type == pygame.KEYDOWN:
-
                     if evento.key == pygame.K_ESCAPE:
-
                         guardarJuego()
-
                         pausa[0] = not pausa[0]
-
                         juegoEjecutandose[0] = False
-
+                        
                 if evento.type == pygame.MOUSEBUTTONUP:
-
-
                     # Traduce las coordenadas ingresadas a coordenadas axiales / hexagonales.
 
 
                     pixcelSeleccionado: PixelCoord = PixelCoord(
 
                         *pygame.mouse.get_pos())
-
                     coordSeleccion: HexCoord = round(
 
                         ADAPTADOR.pixelAHex(pixcelSeleccionado))
 
 
                     # Se verifica que el hexagono seleccionado no se encuentre fuera del tablero.
-
-
                     if coordSeleccion not in HEX_TABLERO:
                         continue
 
-
                     # Se obtiene el estado de seleccion del hexagono seleccionado.
-
-
                     piezaEnHexagono: Optional[str] = HEX_TABLERO[coordSeleccion]
 
-
                     # Si no hemos tomado una pieza:
-
-
                     if not piezaSeleccionada:
-
-
                         # Si no hay nada que tomar:
-
 
                         if piezaEnHexagono is None:
                             continue
@@ -563,64 +413,39 @@ class Juego:
                         Sonido().sonidoTomarPieza(self.reproducir_sonidos)
 
                         # Obtener el color de la pieza seleccionada.
-
-
                         color: str = piezaEnHexagono[0]
 
-
                         # Verificar los turnos.
-
                         if self.bot:
-
                             if not (self.turnoJugador == 0 and color == "b"):
                                 continue
-
                         else:
-
                             if not ((self.turnoJugador == 0 and color == "b") or (self.turnoJugador == 1 and color == "n") or (self.turnoJugador == 2 and color == "r")):
                                 continue
 
 
                         piezaSeleccionada = piezaEnHexagono
-
                         coordPiezaInicial = coordSeleccion
-
                         movimientosValidos = HEX_TABLERO.generarMovimientos(
-
                             coordPiezaInicial)
 
-
                     # De otro modo, se realizo clic con una pieza en mano.
-
-
                     else:
-
                         if coordSeleccion in movimientosValidos:
-
                             guardarJuego()
 
                             Sonido().sonidoSoltarPieza(self.reproducir_sonidos)
 
                             nuevoMov = HEX_TABLERO.moverPieza(
-
                                 coordPiezaInicial, coordSeleccion, "jugador")
-
                             if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
-                            
-
                             piezaSeleccionada = coordPiezaInicial = None
-
                             if nuevoMov != None:
-
                                 actualizaElTurno()
-
                                 sePuedeDeshacer = True
-
                             else: 
-
                                 sePuedeDeshacer = False
             
-
             # se pone la pantalla de color blanco
 
 
@@ -644,34 +469,20 @@ class Juego:
             
 
             # Dibuja los hexagonos de color.
-
-
             for celda in HEX_TABLERO:
-
                 color: tuple[int, int, int] = HEX_COLORES[(
-
                     celda.coordenada.q - celda.coordenada.r) % 3]
-
                 dibujaHex(celda.coordenada, color, llenar=True)
-
-
+            
             # Pinta las celdas movidas por el Bot
-
-
             for i in range(2):
-
                 if hexInicialBot[i] and hexFinalBot[i] is not None:
-
                     dibujaHex(hexInicialBot[i], (200, 100, 100), True)
             
-
             # Si se está haciendo jaque, se pinta la celda del atacante.
-
             if HEX_TABLERO.elReyEstaEnJaque(self.piezas.colores[self.turnoJugador])!=None:
-
                 dibujaHex(HEX_TABLERO.elReyEstaEnJaque(self.piezas.colores[self.turnoJugador]), (255, 10, 10), llenar=True)
-
-
+            
             # Dibuja los colores segun el estado del movimiento. Verde: movimientos posibles, Rojo: capturar piezas, Azul: celda actual.
 
 
@@ -690,18 +501,13 @@ class Juego:
 
 
             # Dibuja el borde negro de los hexagonos y dibuja las piezas.
-
-
             for celda in HEX_TABLERO:
-
                 dibujaHex(celda.coordenada, (20, 20, 20))
 
                 dibujarPiezas(celda)
 
 
             # Si estamos sosteniendo una pieza se dibuja en la posicion del mouse.
-
-
             if piezaSeleccionada:
 
                 PANTALLA.blit(
@@ -710,10 +516,7 @@ class Juego:
 
 
             # Dibuja los movimientos guardados en el registro
-
-
             for i in range(15):
-
                 if 0 <= (i + desplazamientoRegistro) < len(registroMovimientos):
 
                     escribeTexto(registroMovimientos[i + desplazamientoRegistro], 15 , (ANCHO_JUEGO + 30) , (145 + i * 35), (255,255,255))
@@ -722,15 +525,13 @@ class Juego:
             if botonDesplazamientoArriba.dibujar("", self.reproducir_sonidos):
 
                 if desplazamientoRegistro > 0: 
-
                             desplazamientoRegistro -= 1
             
 
             if botonDesplazamientoAbajo.dibujar("", self.reproducir_sonidos):
 
                 desplazamientoRegistro += 1
-
-
+            
             # Posibilidad de deshacer una jugada, solo para el modo facil.
 
             if dificultad == "Facil" and sePuedeDeshacer:
@@ -738,16 +539,11 @@ class Juego:
                 if botonDeshacer.dibujar("", self.reproducir_sonidos):
 
                     registroMovimientos = []
-
                     HEX_TABLERO.turno -= 1
-
                     continuarJuego()
-
                     actualizaElTurno()
-
                     sePuedeDeshacer = False
-
-
+            
             # Describe de quien es el turno:
 
 
@@ -763,14 +559,9 @@ class Juego:
             
 
             # Actualiza la pantalla.
-
-
             pygame.display.flip()
-
-
+            
             # Realiza los movimientos de un Bot.
-
-
             if self.turnoJugador > 0 and self.bot:
 
                 ia = self.botNegro if self.turnoJugador == 1 else self.botRojo
@@ -796,7 +587,6 @@ class Juego:
                     Sonido().sonidoSoltarPieza(self.reproducir_sonidos)
 
                     (hexInicialBot[self.turnoJugador-1], hexFinalBot[self.turnoJugador-1]), nuevoMov = movimiento
-
                     if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
 
                     actualizaElTurno()

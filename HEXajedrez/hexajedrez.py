@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 import pygame
+
 from boton import Boton
 from imagen import Imagen
 from juego import Juego
@@ -36,6 +37,7 @@ juegoEjecutandose = [True]
 pantallaDeOpciones = False
 pantallaDificultad = False
 pantallaCreditos = False
+
 # Opciones:
 opciones = [False, "Medio", True, True]
 """Bot, dificultad, sonido, musica."""
@@ -402,8 +404,6 @@ def comoJugar():
 
 creditosDesplazamiento: int = 0  
 
-# te quiero lea! <3 :D
-
 def creditos(creditosDesplazamiento):
     creditosDesplazamiento -= 1
     pantalla.blit(fondoCelesteImg.redimensionar(
@@ -470,7 +470,6 @@ def creditos(creditosDesplazamiento):
 
 
 # Imagenes del Menu
-
 unoContraUnoImg = Imagen("img/boton_uno_contra_uno.png")
 unoContraDosImg = Imagen("img/boton_uno_contra_dos.png")
 unoContraCpuImg = Imagen("img/boton_uno_contra_cpu.png")
@@ -479,18 +478,15 @@ activadoImg = Imagen("img/caja_activado.png")
 desactivadoImg = Imagen("img/caja_desactivado.png")
 
 # Titulo menu
-
 hexajedrezImg = Imagen("img/HEXajedrez.png")
 
 # Imagen de fondo
-
 fondoRojoImg = Imagen('img/Fondo_Rojo.png')
 fondoAmarilloImg = Imagen('img/Fondo_Amarillo.png')
 fondoCelesteImg = Imagen('img/Fondo_Celeste.png')
 fondoVerdeImg = Imagen('img/Fondo_Verde.jpg')
 
 # Crear Botones
-
 botonUnoContraUno = Boton(0, 285, unoContraUnoImg.obtenerImagen(), 1)
 botonUnoContraDos = Boton(0, 385, unoContraDosImg.obtenerImagen(), 1)
 botonUnoContraCpu = Boton(0, 485, unoContraCpuImg.obtenerImagen(), 1)
@@ -583,7 +579,6 @@ while ejecucion:
 
             if botonOpciones.dibujar("Centrado", opciones[2]):
                 # Abre la pantalla de opciones
-
                 pantallaDeOpciones = True
 
             if botonComoJugar.dibujar("Centrado", opciones[2]):
@@ -622,8 +617,8 @@ while ejecucion:
         # Se selecciona el fondo mediante un condicional
         
         # Se continua el juego si existe una partida.
-        if os.path.exists("../Registro de jugadas.txt") and os.path.exists("../Estado tablero.txt") :
-            archivo = open("../Registro de jugadas.txt","r")
+        if os.path.exists("registro/Registro de jugadas.txt") and os.path.exists("registro/Estado tablero.txt") :
+            archivo = open("registro/Registro de jugadas.txt","r")
             if len(archivo.readlines())>1:
                 juegoEjecutandose[0] = True
                 Juego(ANCHO_PANTALLA, "", opciones[0], True, opciones[2], opciones[3]).iniciar(opciones[1], pantallaDePausa, juegoEjecutandose)
@@ -666,7 +661,7 @@ while ejecucion:
             ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
 
         # se dibuja el texto en la pantalla
-        if os.path.exists("../Registro de jugadas.txt") and len(open("../Registro de jugadas.txt","r").readlines())>1 and os.path.exists("../Estado tablero.txt"):
+        if os.path.exists("registro/Registro de jugadas.txt") and len(open("registro/Registro de jugadas.txt","r").readlines())>1 and os.path.exists("registro/Estado tablero.txt"):
             dibujaTexto("Hay una partida guardada", 30, (255, 255, 70), 200, 490, None)
             dibujaTexto("Presione ESPACIO para continuar", 20, BLANCO, 245, 540, None)
             dibujaTexto("o N para comenzar nuevo juego", 20, BLANCO, 260, 580, None)
@@ -720,10 +715,10 @@ while ejecucion:
                 pantallaDificultad = False
                 pantallaCreditos = False
             if evento.key == pygame.K_n:
-                if os.path.exists("../Registro de jugadas.txt"):
-                    os.remove("../Registro de jugadas.txt")
-                if os.path.exists("../Estado tablero.txt"):
-                    os.remove("../Estado tablero.txt")
+                if os.path.exists("registro/Registro de jugadas.txt"):
+                    os.remove("registro/Registro de jugadas.txt")
+                if os.path.exists("registro/Estado tablero.txt"):
+                    os.remove("registro/Estado tablero.txt")
                 opcionesDeJuego = True
 
     # Actualiza la pantalla
