@@ -3,8 +3,8 @@ import pygame
 class Imagen:
     def __init__(self, direccion):
         """Constructor de una imagen."""
-        self.anchoPantalla = 1100
-        self.altoPantalla = 700
+        self.anchoPantalla, self.altoPantalla = pygame.display.get_surface().get_size()
+        self.direccion = direccion
         self.imagen = pygame.image.load(direccion).convert_alpha()
         self.ancho = self.imagen.get_width()
         self.alto = self.imagen.get_height()
