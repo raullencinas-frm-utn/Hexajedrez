@@ -2,6 +2,8 @@ import pygame
 
 class Sonido:
     """Una clase para poder reproducir sonidos dependiendo de si el usuario los ha desactivado o no."""
+
+    volumen = True
    
     @staticmethod
     def init():
@@ -9,8 +11,9 @@ class Sonido:
 
     @staticmethod
     def sonidoBoton():
-        Sonido = pygame.mixer.Sound("sonido/Boton_Sound.mp3")
-        Sonido.play()
+        sonido = pygame.mixer.Sound("sonido/Boton_Sound.ogg")
+        sonido.set_volume(Sonido.volumen)
+        sonido.play()
 
     @staticmethod
     def sonidoTomarPieza(son: bool):
@@ -21,13 +24,13 @@ class Sonido:
     @staticmethod
     def sonidoSoltarPieza(son: bool):
         if son:
-            Sonido = pygame.mixer.Sound("sonido/Movimiento_soltar.mp3")
+            Sonido = pygame.mixer.Sound("sonido/Movimiento_soltar.ogg")
             Sonido.play()
     
     @staticmethod
     def sonidoIniciarJuego(son: bool):
         if son:
-            Sonido = pygame.mixer.Sound("sonido/board-start.mp3")
+            Sonido = pygame.mixer.Sound("sonido/board-start.ogg")
             Sonido.play()
 
     
