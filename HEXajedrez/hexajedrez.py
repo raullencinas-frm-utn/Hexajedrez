@@ -487,25 +487,25 @@ fondoCelesteImg = Imagen('img/Fondo_Celeste.png')
 fondoVerdeImg = Imagen('img/Fondo_Verde.jpg')
 
 # Crear Botones
-botonUnoContraUno = Boton(0, 285, unoContraUnoImg.obtenerImagen(), 1)
-botonUnoContraDos = Boton(0, 385, unoContraDosImg.obtenerImagen(), 1)
-botonUnoContraCpu = Boton(0, 485, unoContraCpuImg.obtenerImagen(), 1)
-botonUnoContraDosCpu = Boton(0, 585, unoContraDosCpuImg.obtenerImagen(), 1)
-botonContinuar = Boton(0, 210, FUENTE.render("Continuar", True, BLANCO), 1)
-botonOpciones = Boton(0, 260, FUENTE.render("Opciones", True, BLANCO), 1)
-botonComoJugar = Boton(0, 310, FUENTE.render("Como jugar", True, BLANCO), 1)
-botonCreditos = Boton(0, 360, FUENTE.render("Creditos", True, BLANCO), 1)
-botonMenuPrincipal = Boton(0, 410, FUENTE.render("Menu principal", True, BLANCO), 1)
-botonSalir = Boton(0, 460, FUENTE.render("Salir", True, BLANCO), 1)
-botonSonido = Boton(410, 395, FUENTE.render("Sonido", True, BLANCO), 1)
-botonMusica = Boton(410, 345, FUENTE.render("Musica", True, BLANCO), 1)
-botonSonidoCheckBox = Boton(660, 395, desactivadoImg.obtenerImagen(), 1)
-botonMusicaCheckBox = Boton(660, 345, desactivadoImg.obtenerImagen(), 1)
-botonDificultad = Boton(0, 295, FUENTE.render("Dificultad", True, BLANCO), 1)
-botonFacil = Boton(280, 295, FUENTE.render("Facil", True, BLANCO), 1)
-botonMedio = Boton(0, 295, FUENTE.render("Medio", True, BLANCO), 1)
-botonDificil = Boton(680, 295, FUENTE.render("Dificil", True, BLANCO), 1)
-botonVolver = Boton(0, 245, FUENTE.render("Volver", True, BLANCO), 1)
+botonUnoContraUno = Boton(0, 285, unoContraUnoImg.obtenerImagen())
+botonUnoContraDos = Boton(0, 385, unoContraDosImg.obtenerImagen())
+botonUnoContraCpu = Boton(0, 485, unoContraCpuImg.obtenerImagen())
+botonUnoContraDosCpu = Boton(0, 585, unoContraDosCpuImg.obtenerImagen())
+botonContinuar = Boton(0, 210, FUENTE.render("Continuar", True, BLANCO))
+botonOpciones = Boton(0, 260, FUENTE.render("Opciones", True, BLANCO))
+botonComoJugar = Boton(0, 310, FUENTE.render("Como jugar", True, BLANCO))
+botonCreditos = Boton(0, 360, FUENTE.render("Creditos", True, BLANCO))
+botonMenuPrincipal = Boton(0, 410, FUENTE.render("Menu principal", True, BLANCO))
+botonSalir = Boton(0, 460, FUENTE.render("Salir", True, BLANCO))
+botonSonido = Boton(495, 395, FUENTE.render("Sonido", True, BLANCO))
+botonMusica = Boton(500, 345, FUENTE.render("Musica", True, BLANCO))
+botonSonidoCheckBox = Boton(660, 395, desactivadoImg.obtenerImagen())
+botonMusicaCheckBox = Boton(660, 345, desactivadoImg.obtenerImagen())
+botonDificultad = Boton(0, 295, FUENTE.render("Dificultad", True, BLANCO))
+botonFacil = Boton(280, 295, FUENTE.render("Facil", True, BLANCO))
+botonMedio = Boton(0, 295, FUENTE.render("Medio", True, BLANCO))
+botonDificil = Boton(820, 295, FUENTE.render("Dificil", True, BLANCO))
+botonVolver = Boton(0, 245, FUENTE.render("Volver", True, BLANCO))
 
 # Bucle de ejecucion
 ejecucion = True
@@ -531,35 +531,35 @@ while ejecucion:
             
             # se muestra el fondo verde con los botones de opciones
             
-            pantalla.blit(fondoVerdeImg.redimensionar(
-                ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
+            fondoVerdeImg.dibujar(0, 0)
 
             # se muestran las opciones de musica y sonido asi como sus cajitas de opciones.
 
-            if botonSonido.dibujar("", not opciones[2]) or botonSonidoCheckBox.dibujar("", not opciones[2]):
+            if botonSonido.dibujar() or botonSonidoCheckBox.dibujar():
                 opciones[2] = not opciones[2]
-            if botonMusica.dibujar("", opciones[2]) or botonMusicaCheckBox.dibujar("", opciones[2]):
+                Sonido.volumen = opciones[2]
+
+            if botonMusica.dibujar() or botonMusicaCheckBox.dibujar():
                 opciones[3] = not opciones[3]
-            pantalla.blit(activadoImg.obtenerImagen(
-            ) if opciones[2] else desactivadoImg.obtenerImagen(), (660, 395))
-            pantalla.blit(activadoImg.obtenerImagen(
-            ) if opciones[3] else desactivadoImg.obtenerImagen(), (660, 345))
+
+            activadoImg.dibujar(660, 395) if opciones[2] else desactivadoImg.dibujar(660, 395)
+            activadoImg.dibujar(660, 345) if opciones[3] else desactivadoImg.dibujar(660, 345)
 
             if pantallaDificultad:
-                if botonFacil.dibujar("", opciones[2]):
+                if botonFacil.dibujar():
                     opciones[1] = "Facil"
                     pantallaDificultad = False
-                if botonMedio.dibujar("Centrado", opciones[2]):
+                if botonMedio.dibujar():
                     opciones[1] = "Medio"
                     pantallaDificultad = False
-                if botonDificil.dibujar("", opciones[2]):
+                if botonDificil.dibujar():
                     opciones[1] = "Dificil"
                     pantallaDificultad = False
             else:
-                if botonDificultad.dibujar("Centrado", opciones[2]):
+                if botonDificultad.dibujar():
                     pantallaDificultad = True
 
-            if botonVolver.dibujar("Centrado", opciones[2]):
+            if botonVolver.dibujar():
 
                 # Se abandona la pantalla de opciones
 
@@ -569,31 +569,28 @@ while ejecucion:
 
             # se muestra el fondo celeste y se dibujan los botones
 
-            pantalla.blit(fondoCelesteImg.redimensionar(
-                ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
+            fondoCelesteImg.dibujar(0, 0)
 
             # se chequea que boton se presiona y se abre la ventana correspondiente
 
-            if botonContinuar.dibujar("Centrado", opciones[2]):
+            if botonContinuar.dibujar():
                 pantallaDePausa[0] = False
 
-            if botonOpciones.dibujar("Centrado", opciones[2]):
+            if botonOpciones.dibujar():
                 # Abre la pantalla de opciones
                 pantallaDeOpciones = True
 
-            if botonComoJugar.dibujar("Centrado", opciones[2]):
-
+            if botonComoJugar.dibujar():
                 # Se muestran las instrucciones de como jugar.
 
                 comoJugar()
                 pantallaDePausa[0] = False
-
-            if botonCreditos.dibujar("Centrado", opciones[2]):
-                creditos(creditosDesplazamiento)
+                
+            if botonCreditos.dibujar():
                 creditosDesplazamiento = 600
                 pantallaCreditos = True
 
-            if botonMenuPrincipal.dibujar("Centrado", opciones[2]):
+            if botonMenuPrincipal.dibujar():
                 
                 # Se vuelve el programa al menu inicial
                 
@@ -605,7 +602,7 @@ while ejecucion:
                                 
                 pantallaDePausa[0] = False
 
-            if botonSalir.dibujar("Centrado", opciones[2]):
+            if botonSalir.dibujar():
 
                 # Se abandona el bucle de ejecucion y cierra el programa
 
@@ -628,25 +625,24 @@ while ejecucion:
             
         # Se dibuja el fondo amarillo
 
-        pantalla.blit(fondoAmarilloImg.redimensionar(
-            ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
+        fondoAmarilloImg.dibujar(0, 0)
 
         # Se muestra el titulo
 
-        pantalla.blit(hexajedrezImg.obtenerImagen(), (100, 20))
+        hexajedrezImg.dibujar(0, 120)
 
         # Se dibujan los botones de los modos de juego y al presionarlos cambia la pantalla
 
-        if botonUnoContraUno.dibujar("Centrado",opciones[2]):
+        if botonUnoContraUno.dibujar():
             juegoEjecutandose[0] = True
             Juego(ANCHO_PANTALLA, "bn",opciones[0], False, opciones[2], opciones[3]).iniciar(opciones[1], pantallaDePausa, juegoEjecutandose)
-        if botonUnoContraDos.dibujar("Centrado",opciones[2]):
+        if botonUnoContraDos.dibujar():
             juegoEjecutandose[0] = True
             Juego(ANCHO_PANTALLA, "bnr",opciones[0], False, opciones[2], opciones[3]).iniciar(opciones[1], pantallaDePausa, juegoEjecutandose)
-        if botonUnoContraCpu.dibujar("Centrado",opciones[2]):
+        if botonUnoContraCpu.dibujar():
             juegoEjecutandose[0] = True
             Juego(ANCHO_PANTALLA, "bn", True, False, opciones[2], opciones[3]).iniciar(opciones[1], pantallaDePausa, juegoEjecutandose)
-        if botonUnoContraDosCpu.dibujar("Centrado",opciones[2]):
+        if botonUnoContraDosCpu.dibujar():
             juegoEjecutandose[0] = True
             Juego(ANCHO_PANTALLA, "bnr", True, False, opciones[2], opciones[3]).iniciar(opciones[1], pantallaDePausa, juegoEjecutandose)
     
@@ -657,8 +653,9 @@ while ejecucion:
 
         # se dibuja el fondo rojo
 
-        pantalla.blit(fondoRojoImg.redimensionar(
-            ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
+        fondoRojoImg.dibujar(0, 0)
+        
+        hexajedrezImg.dibujar(0, ALTO_PANTALLA/2)
 
         # se dibuja el texto en la pantalla
         if os.path.exists("registro/Registro de jugadas.txt") and len(open("registro/Registro de jugadas.txt","r").readlines())>1 and os.path.exists("registro/Estado tablero.txt"):
@@ -678,26 +675,6 @@ while ejecucion:
             ejecucion = False
 
         # actualizar la ventana al redimensionar
-
-        elif evento.type == pygame.VIDEORESIZE:
-            # Obtener las nuevas dimensiones de la pantalla
-
-            ANCHO_PANTALLA, ALTO_PANTALLA = evento.w, evento.h
-
-            # Calcular la relacion de aspecto actual
-
-            relacion_de_aspecto = ANCHO_PANTALLA / ALTO_PANTALLA
-
-            # Redimensionar la pantalla manteniendo la relacion de aspecto
-
-            pantalla = pygame.display.set_mode((ANCHO_PANTALLA, int(
-                ANCHO_PANTALLA / relacion_de_aspecto)), pygame.RESIZABLE)
-
-            # Actualizar la pantalla
-
-            pygame.display.flip()
-
-        # si se aprieta una tecla se valida que
 
         elif evento.type == pygame.KEYDOWN:
 

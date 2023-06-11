@@ -1,0 +1,7 @@
+bn True 6
+peon blanco F4 a F6
+caballo negro G9 a F7
+peon blanco G3 a G4
+alfil negro F9 a C3
+peon blanco E3 a E5
+caballo negro E9 a G7
