@@ -196,27 +196,21 @@ class Juego:
 
         def evaluarEstadoDelRey():
             if HEX_TABLERO.elReyEstaEnJaque(HEX_TABLERO.piezas.colores[self.turnoJugador])!=None:
-
-                if HEX_TABLERO.elReyEstaEnJaqueMate(HEX_TABLERO.piezas.colores[self.turnoJugador]):
-
+                if HEX_TABLERO.elReyEstaAhogado(HEX_TABLERO.piezas.colores[self.turnoJugador]):
+                    # Se muestra en pantalla el mensaje de jaque mate
                     self.estadoRey = "Jaque Mate al Rey "+self.turnoTexto.replace(" ","")
                     mensajeDeEstadoDelRey(self, True)
-                    return
                     
-
                 else:
                     self.estadoRey = "Jaque al Rey "+self.turnoTexto.replace(" ","")
                     mensajeDeEstadoDelRey(self, False)
-                    return
                 
-
             elif HEX_TABLERO.elReyEstaAhogado(HEX_TABLERO.piezas.colores[self.turnoJugador]):
                 self.estadoRey = "Rey "+self.turnoTexto.replace(" ","")+" ahogado"
                 mensajeDeEstadoDelRey(self, True)
-                return
             
-
-            self.estadoRey = ""
+            else:
+                self.estadoRey = ""
         
         def mensajeDeEstadoDelRey(self, mate: bool):
             """Dibuja una alerta que describe el estado de Jaque del rey del jugador actual."""
@@ -563,8 +557,8 @@ class Juego:
             
             # Realiza los movimientos de un Bot.
             if self.turnoJugador > 0 and self.bot:
-
-                ia = self.botNegro if self.turnoJugador == 1 else self.botRojo
+                # Se designa el bot al que le toca jugar.
+                bot = self.botNegro if self.turnoJugador == 1 else self.botRojo
                 
 
                 pygame.draw.rect(PANTALLA, (0, 0, 0), (150, 280, 400, 150))
@@ -579,7 +573,7 @@ class Juego:
 
                 pygame.display.flip()
 
-                movimiento = ia.move(HEX_TABLERO)
+                movimiento = bot.mover(HEX_TABLERO)
                 
 
                 if movimiento != None:
@@ -588,20 +582,6 @@ class Juego:
 
                     (hexInicialBot[self.turnoJugador-1], hexFinalBot[self.turnoJugador-1]), nuevoMov = movimiento
                     if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
-
-                    actualizaElTurno()
-                    
-
-                else:
-
-                    evaluarEstadoDelRey()
-
-                    HEX_TABLERO.turno += 1
-
-                    self.continuar = True
-
-                    actualizaElTurno()
                 
-
-                texto = None
-
+                actualizaElTurno()
+                
