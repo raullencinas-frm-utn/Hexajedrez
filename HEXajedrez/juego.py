@@ -23,9 +23,7 @@ class Juego:
 
         """Constructor de clase Juego."""
         if continuar:
-
             linea:str = open("registro/Registro de jugadas.txt","r").readline().split(" ")
-
             colores = linea[0]
             bot = linea[1]=="True"
 

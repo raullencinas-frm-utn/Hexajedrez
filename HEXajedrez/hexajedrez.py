@@ -5,6 +5,7 @@ import pygame
 from boton import Boton
 from imagen import Imagen
 from juego import Juego
+from metodos import Metodos
 from tablero import Tablero
 from sonido import Sonido
 
@@ -41,52 +42,6 @@ pantallaCreditos = False
 # Opciones:
 opciones = [False, "Medio", True, True]
 """Bot, dificultad, sonido, musica."""
-
-# Funciones
-
-
-def dibujaTexto(texto, tamanio, colorTexto, x, y, posicion: Optional[str]):
-    """ Genenera un texto en pantalla con la FUENTE y color de texto elegidos en la 
-    posicion "x" e "y" de la pantalla con el texto elegido. """
-    img = pygame.font.Font(
-        "fnt/8-Bit.TTF", tamanio).render(texto, True, colorTexto)
-    if posicion == "Centrado":
-        anchoPantalla, altoPantalla = pygame.display.get_window_size()
-        x = (anchoPantalla/2) - (img.get_width()/2)
-    pantalla.blit(img, (x, y))
-
-
-def draw_text_box(text, width, height):
-    y = 700-height
-    x = 1100
-    WHITE = (255, 255, 255)
-    fuenteTam = 25
-    fuente = pygame.font.SysFont(None, fuenteTam)
-    lines = []
-    words = text.split(" ")
-    current_line = words[0]
-    for word in words[1:]:
-        test_line = current_line + " " + word
-        if fuente.size(test_line)[0] <= width:
-            current_line = test_line
-        else:
-            lines.append(current_line)
-            current_line = word
-
-    lines.append(current_line)
-
-    y += (height - len(lines) * (fuenteTam + 2.5)) // 2
-
-    for line in lines:
-        text_surface = fuente.render(line, True, WHITE)
-        text_rect = text_surface.get_rect()
-        text_rect.centerx = x // 2
-        text_rect.y = y
-        pygame.draw.rect(pantalla, (0, 0, 0), ((text_rect.x-2.5),
-                         (y-2.5), (text_rect.width+5), (text_rect.height+5)))
-        pantalla.blit(text_surface, text_rect)
-        y += fuenteTam + 5
-
 
 def comoJugar():
     y = ALTO_PANTALLA/2
@@ -363,7 +318,7 @@ def comoJugar():
     ejecucion = True
     botonTitulo: str = "Finalizar"
     botonFinalizar = Boton(30, 650, pygame.font.Font("fnt/8-Bit.TTF", 20).render(
-                botonTitulo, True, (255, 255, 255)), 1)
+                botonTitulo, True, (255, 255, 255)))
     for i in range(57):
 
         info = comoJugar[i]
@@ -373,11 +328,11 @@ def comoJugar():
         ).get_width()/2), (y-(Imagen(info["imagen"]).obtenerImagen().get_height()/2))))
         botonTitulo: str = "Finalizar" if esFin else "Continuar"
         botonContinuar = Boton(900, 650, pygame.font.Font("fnt/8-Bit.TTF", 20).render(
-            botonTitulo, True, (255, 255, 255)), 1)
+            botonTitulo, True, (255, 255, 255)))
         
         pantalla.blit(
-            Imagen("img/HEXajedrez.png").redimensionar(500, 125), (310, 10))
-        draw_text_box(info["descripcion"], 750, 150)
+            Imagen("img/HEXajedrez.png").obtenerImagen(), (310, 10))
+        Metodos.dibujarCuadroTexto(info["descripcion"], 750, 150)
         siguiente = True
         while siguiente:
             for evento in pygame.event.get():
@@ -396,78 +351,12 @@ def comoJugar():
 
                         
                 if not esFin:        
-                    botonContinuar.dibujar("", opciones[2])
-                botonFinalizar.dibujar("", opciones[2])
+                    botonContinuar.dibujar()
+                botonFinalizar.dibujar()
                 pygame.display.flip()
         if i > 57: break
         
-
-creditosDesplazamiento: int = 0  
-
-def creditos(creditosDesplazamiento):
-    creditosDesplazamiento -= 1
-    pantalla.blit(fondoCelesteImg.redimensionar(
-        ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
-    # Se dibujan los creditos en pantalla
-    pantalla.blit(hexajedrezImg.obtenerImagen(),
-                  (120, -80+creditosDesplazamiento))
-    dibujaTexto("Un programa de ajedrez hexagonal ", 20, BLANCO,
-                0, 130+creditosDesplazamiento, "Centrado")
-    dibujaTexto("realizado en Python", 20, BLANCO, 0,
-                160+creditosDesplazamiento, "Centrado")
-    dibujaTexto("En este trabajo presentamos el", 20, BLANCO,
-                0, 190+creditosDesplazamiento, "Centrado")
-    dibujaTexto("desarrollo de un juego de computadora ", 20,
-                BLANCO, 0, 220+creditosDesplazamiento, "Centrado")
-    dibujaTexto("llamado HEXajedrez que simula", 20, BLANCO,
-                0, 250+creditosDesplazamiento, "Centrado")
-    dibujaTexto("el Ajedrez Hexagonal de mesa que es ", 20,
-                BLANCO, 0, 280+creditosDesplazamiento, "Centrado")
-    dibujaTexto("una variante del famoso juego", 20, BLANCO,
-                0, 310+creditosDesplazamiento, "Centrado")
-    dibujaTexto("Ajedrez que se juega en un tablero", 20, BLANCO,
-                0, 340+creditosDesplazamiento, "Centrado")
-    dibujaTexto("de celdas hexagonales en lugar de cuadradas", 20,
-                BLANCO, 0, 370+creditosDesplazamiento, "Centrado")
-    dibujaTexto("El objetivo consiste en programar este juego", 20,
-                BLANCO, 0, 400+creditosDesplazamiento, "Centrado")
-    dibujaTexto("en Python sin conocimientos previos", 20,
-                BLANCO, 0, 430+creditosDesplazamiento, "Centrado")
-
-    dibujaTexto("Integrantes", 30, BLANCO, 0, 500 +
-                creditosDesplazamiento, "Centrado")
-    dibujaTexto("Espejo Mezzabotta Giuliano", 15, BLANCO,
-                0, 540+creditosDesplazamiento, "Centrado")
-    dibujaTexto("Lencinas Berenguer Raul Alejandro", 15, BLANCO,
-                0, 570+creditosDesplazamiento, "Centrado")
-    dibujaTexto("Maureira Ezequiel Jesus", 15, BLANCO, 0,
-                600+creditosDesplazamiento, "Centrado")
-    dibujaTexto("Santilli Elias Vicente", 15, BLANCO, 0,
-                630+creditosDesplazamiento, "Centrado")
-    dibujaTexto("Valdearenas Leandro Javier", 15, BLANCO,
-                0, 660+creditosDesplazamiento, "Centrado")
-    dibujaTexto("Varberde Thompson Francisco Alejandro", 15,
-                BLANCO, 0, 690+creditosDesplazamiento, "Centrado")
-    dibujaTexto("Detalles", 30, BLANCO, 0, 740 +
-                creditosDesplazamiento, "Centrado")
-    dibujaTexto("Docente Ing Carlos Rodriguez", 15, BLANCO,
-                0, 790+creditosDesplazamiento, "Centrado")
-    dibujaTexto("Metodologia de la Investigacion", 15, BLANCO,
-                0, 820+creditosDesplazamiento, "Centrado")
-    dibujaTexto("Universidad Tecnologica Nacional", 15, BLANCO,
-                0, 850+creditosDesplazamiento, "Centrado")
-    dibujaTexto("( Facultad Regional de Mendoza )", 15, BLANCO,
-                0, 880+creditosDesplazamiento, "Centrado")
-
-    if creditosDesplazamiento < -900:
-
-        # Se abandona la pantalla de creditos
-
-        creditosDesplazamiento = 0
-        pantallaCreditos = False
-
-    return creditosDesplazamiento
-
+        creditosDesplazamiento: int = 0  
 
 # Imagenes del Menu
 unoContraUnoImg = Imagen("img/boton_uno_contra_uno.png")
@@ -485,6 +374,10 @@ fondoRojoImg = Imagen('img/Fondo_Rojo.png')
 fondoAmarilloImg = Imagen('img/Fondo_Amarillo.png')
 fondoCelesteImg = Imagen('img/Fondo_Celeste.png')
 fondoVerdeImg = Imagen('img/Fondo_Verde.jpg')
+fondoNaranjaImg = Imagen('img/Fondo_Naranja.jpg')
+
+# Metodos
+metodo = Metodos()
 
 # Crear Botones
 botonUnoContraUno = Boton(0, 285, unoContraUnoImg.obtenerImagen())
@@ -524,7 +417,7 @@ while ejecucion:
     
     if pantallaDePausa[0] == True:
         if pantallaCreditos:
-            creditosDesplazamiento = creditos(creditosDesplazamiento)
+            creditosDesplazamiento = metodo.creditos(creditosDesplazamiento)
             # PANTALLA DE OPCIONES
             
         elif pantallaDeOpciones:
@@ -582,12 +475,12 @@ while ejecucion:
 
             if botonComoJugar.dibujar():
                 # Se muestran las instrucciones de como jugar.
-
                 comoJugar()
                 pantallaDePausa[0] = False
                 
             if botonCreditos.dibujar():
                 creditosDesplazamiento = 600
+                metodo.creditos(creditosDesplazamiento)
                 pantallaCreditos = True
 
             if botonMenuPrincipal.dibujar():
@@ -659,12 +552,12 @@ while ejecucion:
 
         # se dibuja el texto en la pantalla
         if os.path.exists("registro/Registro de jugadas.txt") and len(open("registro/Registro de jugadas.txt","r").readlines())>1 and os.path.exists("registro/Estado tablero.txt"):
-            dibujaTexto("Hay una partida guardada", 30, (255, 255, 70), 200, 490, None)
-            dibujaTexto("Presione ESPACIO para continuar", 20, BLANCO, 245, 540, None)
-            dibujaTexto("o N para comenzar nuevo juego", 20, BLANCO, 260, 580, None)
+            Metodos.dibujarTexto("Hay una partida guardada", 30, (255, 255, 70), 0, 490)
+            Metodos.dibujarTexto("Presione ESPACIO para continuar", 20, BLANCO, 0, 540)
+            Metodos.dibujarTexto("o N para comenzar nuevo juego", 20, BLANCO, 0, 580)
         else:
-            dibujaTexto("Presione ESPACIO para comenzar", 30, BLANCO, 130, 500, None)
-            dibujaTexto("o ESCAPE para mas opciones", 20, BLANCO, 295, 550, None)
+            Metodos.dibujarTexto("Presione ESPACIO para comenzar", 30, BLANCO, 0, 500)
+            Metodos.dibujarTexto("o ESCAPE para mas opciones", 20, BLANCO, 0, 550)
     # Escucha eventos
 
     for evento in pygame.event.get():
