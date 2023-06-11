@@ -24,7 +24,7 @@ class Juego:
         """Constructor de clase Juego."""
         if continuar:
 
-            linea:str = open("../Registro de jugadas.txt","r").readline().split(" ")
+            linea:str = open("registro/Registro de jugadas.txt","r").readline().split(" ")
 
             colores = linea[0]
 
@@ -161,13 +161,13 @@ class Juego:
 
         def guardarJuego():
             """Cierra el programa y guarda el registro de jugadas en un archivo de texto."""
-            archivo = open("../Registro de jugadas.txt","w")
+            archivo = open("registro/Registro de jugadas.txt","w")
             archivo.write(HEX_TABLERO.piezas.colores+" "+str(self.bot)+" "+str(HEX_TABLERO.turno)+"\n")
             for linea in registroMovimientos:
                 archivo.write(linea+"\n")
             archivo.close()
             archivo = None
-            archivo = open("../Estado tablero.txt","w")
+            archivo = open("registro/Estado tablero.txt","w")
             for celdaElegida in HEX_TABLERO:
                 if celdaElegida.estado!=None:
                     archivo.write(celdaElegida.coordenada.__str__()+" "+str(celdaElegida.estado)+"\n")
@@ -262,9 +262,9 @@ class Juego:
 
                                 juegoEjecutandose[0] = False
 
-                                if os.path.exists("../Estado tablero.txt"):
+                                if os.path.exists("registro/Estado tablero.txt"):
 
-                                    os.remove("../Estado tablero.txt")
+                                    os.remove("registro/Estado tablero.txt")
 
                             ejecucion = False
                         
@@ -328,8 +328,8 @@ class Juego:
 
         def continuarJuego():
             """Ejecuta las jugadas guardadas en el archivo de texto de registros para devolver el programa al estado en el que se lo dejó."""
-            if os.path.exists("../Registro de jugadas.txt") and os.path.exists("../Estado tablero.txt"):
-                archivo = open("../Registro de jugadas.txt","r")
+            if os.path.exists("registro/Registro de jugadas.txt") and os.path.exists("registro/Estado tablero.txt"):
+                archivo = open("registro/Registro de jugadas.txt","r")
                 for linea in archivo.readlines():
                     palabras:str = linea.split(" ")
                     if len(palabras) < 4:
@@ -340,7 +340,7 @@ class Juego:
                 archivo.close()
                 for celdaElegida in HEX_TABLERO:
                     celdaElegida.estado = None
-                archivo = open("../Estado tablero.txt","r")
+                archivo = open("registro/Estado tablero.txt","r")
                 for linea in archivo.readlines():
                     palabras:str = linea.split(" ")
                     HEX_TABLERO.__setitem__(HexCoord(float(palabras[0][1:-1]),float(palabras[1][:-1]),float(palabras[2][:-1])), palabras[3][:-1])

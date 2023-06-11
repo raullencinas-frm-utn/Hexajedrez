@@ -617,8 +617,8 @@ while ejecucion:
         # Se selecciona el fondo mediante un condicional
         
         # Se continua el juego si existe una partida.
-        if os.path.exists("../Registro de jugadas.txt") and os.path.exists("../Estado tablero.txt") :
-            archivo = open("../Registro de jugadas.txt","r")
+        if os.path.exists("registro/Registro de jugadas.txt") and os.path.exists("registro/Estado tablero.txt") :
+            archivo = open("registro/Registro de jugadas.txt","r")
             if len(archivo.readlines())>1:
                 juegoEjecutandose[0] = True
                 Juego(ANCHO_PANTALLA, "", opciones[0], True, opciones[2], opciones[3]).iniciar(opciones[1], pantallaDePausa, juegoEjecutandose)
@@ -661,7 +661,7 @@ while ejecucion:
             ANCHO_PANTALLA, ALTO_PANTALLA), (0, 0))
 
         # se dibuja el texto en la pantalla
-        if os.path.exists("../Registro de jugadas.txt") and len(open("../Registro de jugadas.txt","r").readlines())>1 and os.path.exists("../Estado tablero.txt"):
+        if os.path.exists("registro/Registro de jugadas.txt") and len(open("registro/Registro de jugadas.txt","r").readlines())>1 and os.path.exists("registro/Estado tablero.txt"):
             dibujaTexto("Hay una partida guardada", 30, (255, 255, 70), 200, 490, None)
             dibujaTexto("Presione ESPACIO para continuar", 20, BLANCO, 245, 540, None)
             dibujaTexto("o N para comenzar nuevo juego", 20, BLANCO, 260, 580, None)
@@ -715,10 +715,10 @@ while ejecucion:
                 pantallaDificultad = False
                 pantallaCreditos = False
             if evento.key == pygame.K_n:
-                if os.path.exists("../Registro de jugadas.txt"):
-                    os.remove("../Registro de jugadas.txt")
-                if os.path.exists("../Estado tablero.txt"):
-                    os.remove("../Estado tablero.txt")
+                if os.path.exists("registro/Registro de jugadas.txt"):
+                    os.remove("registro/Registro de jugadas.txt")
+                if os.path.exists("registro/Estado tablero.txt"):
+                    os.remove("registro/Estado tablero.txt")
                 opcionesDeJuego = True
 
     # Actualiza la pantalla
