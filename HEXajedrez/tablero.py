@@ -311,10 +311,10 @@ class Tablero:
         imagenCaballo = Imagen(f"img/{color}_caballo.png")
 
         # Se crean los botones.
-        botonDama = Boton(180, 350, imagenDama.redimensionar(50,50), 1)
-        botonAlfil = Boton(280, 350, imagenAlfil.redimensionar(50,50), 1)
-        botonTorre = Boton(380, 350, imagenTorre.redimensionar(50,50), 1)
-        botonCaballo = Boton(480, 350, imagenCaballo.redimensionar(50,50), 1)
+        botonDama = Boton(180, 350, imagenDama.obtenerImagen())
+        botonAlfil = Boton(280, 350, imagenAlfil.obtenerImagen())
+        botonTorre = Boton(380, 350, imagenTorre.obtenerImagen())
+        botonCaballo = Boton(480, 350, imagenCaballo.obtenerImagen())
 
         selected_piece = None
         ejecucion = True
@@ -328,25 +328,24 @@ class Tablero:
                     pygame.quit()
                     exit()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    mouse_pos = pygame.mouse.get_pos()
-                    if botonDama.rectangulo.collidepoint(mouse_pos):
-                        selected_piece = "dama"
-                        ejecucion = False
-                    elif botonAlfil.rectangulo.collidepoint(mouse_pos):
-                        selected_piece = "alfil"
-                        ejecucion = False
-                    elif botonTorre.rectangulo.collidepoint(mouse_pos):
-                        selected_piece = "torre"
-                        ejecucion = False
-                    elif botonCaballo.rectangulo.collidepoint(mouse_pos):
-                        selected_piece = "caballo"
-                        ejecucion = False
-
-            botonDama.dibujar("",False)
-            botonAlfil.dibujar("",False)
-            botonTorre.dibujar("",False)
-            botonCaballo.dibujar("",False)
+            if botonDama.dibujar():
+                selected_piece = "dama"
+                ejecucion = False
+            elif botonAlfil.dibujar():
+                selected_piece = "alfil"
+                ejecucion = False
+            elif botonTorre.dibujar():
+                selected_piece = "torre"
+                ejecucion = False
+            elif botonCaballo.dibujar():
+                selected_piece = "caballo"
+                ejecucion = False
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    ejecucion = False
+                    pygame.quit()
+                    exit()
 
             pygame.display.flip()
 
@@ -390,18 +389,11 @@ class Tablero:
 
     def elReyExiste(self, color: str) -> bool:
         """Comprobar si un rey del color especificado existe."""
-        for celda in self:
-            if celda.estado == f"{color}_rey":
-                return True
-        return False
+        return f"R{color}" in self.__str__()
 
     def contarReyes(self) -> int:
         """Contar la cantidad de reyes en juego."""
-        contador:int = 0
-        for color in self.piezas.colores:
-            if self.elReyExiste(color):
-                contador += 1
-        return contador
+        return self.__str__().count("R")
 
     def elReyEstaEnJaque(self, color: str) -> Optional(HexCoord):
         """Comprobar si un rey del color especificado está en jaque en este momento."""
@@ -461,7 +453,7 @@ class Tablero:
                             else:
                                 if offset not in (HexCoord(1, -1, 0), HexCoord(-1, 0, 1)):
                                     break
-                        elif celda.estado[0] == "r":
+                        else:
                             if offset not in (HexCoord(-1, 1, 0), HexCoord(0, -1, 1)):
                                 break
 

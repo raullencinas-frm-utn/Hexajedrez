@@ -9,6 +9,7 @@ from imagen import Imagen
 from hexPixelAdaptador import HexPixelAdaptador
 
 
+
 class Bot:
     """Clase que realiza los movimientos de la CPU."""
     cacheMinimax = dict()
@@ -53,7 +54,7 @@ class Bot:
         # Se guardan los valores para dibujar la pieza.
         reloj = pygame.time.Clock()
         piezaAMover = tablero[mejorMovimiento.__getitem__(1)]
-        imagenBot = Imagen(f"img/{piezaAMover}.png").redimensionar(60, 60)
+        imagenBot = Imagen(f"img/{piezaAMover}.png").obtenerImagen()
         coordenadas_iniciales = self.adaptador.hexAPixel(mejorMovimiento.__getitem__(0))
         coordenadas_finales = self.adaptador.hexAPixel(mejorMovimiento.__getitem__(1))
         dx = coordenadas_finales[0] - coordenadas_iniciales[0]
