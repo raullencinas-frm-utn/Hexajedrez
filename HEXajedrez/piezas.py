@@ -1,4 +1,5 @@
 import pygame
+from imagen import Imagen
 
 
 class Piezas:
@@ -12,12 +13,7 @@ class Piezas:
     def piezasImagenes(self, colores: str) -> dict[str, pygame.Surface]:
         """Devuelve un diccionario con las imagenes de las piezas del color ingresado."""
         return {
-            nombresDePiezas: pygame.transform.scale(
-                pygame.image.load(
-                    f"img/{nombresDePiezas}.png").convert_alpha(),
-                (60, 60)
-            )
-            for nombresDePiezas in [f"{color}_{nombre}" for color in self.colores for nombre in self.nombres]
+            nombresDePiezas: Imagen(f"img/{nombresDePiezas}.png").obtenerImagen() for nombresDePiezas in [f"{color}_{nombre}" for color in self.colores for nombre in self.nombres]
         }
 
     def movimientos(self) -> dict[str, list]:
@@ -27,7 +23,6 @@ class Piezas:
             (-1, 2, -1), (1, -2, 1),
             (-1, -1, 2), (1, 1, -2)
         ]),
-
             **dict.fromkeys([f"{color}_torre" for color in self.colores], [
                 (0, 1, -1), (0, -1, 1),
                 (1, 0, -1), (-1, 0, 1),
@@ -60,13 +55,13 @@ class Piezas:
                 (-1, -2, 3), (1, -3, 2),
                 (2, -3, 1), (3, -2, -1)
             ]),
-
             "b_peon": [
             (0, 1, -1),
             (-1, 1, 0),
             (1, 0, -1)
         ]
         }
+        
         if self.colores.endswith("r"):
             movimientos["n_peon"] = [(1, -1, 0), (0, -1, 1), (1, 0, -1)]
             movimientos["r_peon"] = [(-1, 0, 1), (0, -1, 1), (-1, 1, 0)]
