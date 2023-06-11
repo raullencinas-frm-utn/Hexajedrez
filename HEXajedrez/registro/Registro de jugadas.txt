@@ -1,7 +1,0 @@
-bnr True 6
-peon blanco F4 a F6
-alfil negro C6 a I6
-dama roja K5 a I6
-peon blanco E3 a E5
-dama negra B7 a C6
-caballo rojo I7 a G10
