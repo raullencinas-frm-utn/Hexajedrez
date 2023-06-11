@@ -65,6 +65,7 @@ class Piezas:
             (1, 0, -1)
         ]
         }
+        
         if self.colores.endswith("r"):
             movimientos["n_peon"] = [(1, -1, 0), (0, -1, 1), (1, 0, -1)]
             movimientos["r_peon"] = [(-1, 0, 1), (0, -1, 1), (-1, 1, 0)]

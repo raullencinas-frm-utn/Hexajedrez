@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 import pygame
+
 from boton import Boton
 from imagen import Imagen
 from juego import Juego
@@ -36,6 +37,7 @@ juegoEjecutandose = [True]
 pantallaDeOpciones = False
 pantallaDificultad = False
 pantallaCreditos = False
+
 # Opciones:
 opciones = [False, "Medio", True, True]
 """Bot, dificultad, sonido, musica."""
@@ -402,8 +404,6 @@ def comoJugar():
 
 creditosDesplazamiento: int = 0  
 
-# te quiero lea! <3 :D
-
 def creditos(creditosDesplazamiento):
     creditosDesplazamiento -= 1
     pantalla.blit(fondoCelesteImg.redimensionar(
@@ -470,7 +470,6 @@ def creditos(creditosDesplazamiento):
 
 
 # Imagenes del Menu
-
 unoContraUnoImg = Imagen("img/boton_uno_contra_uno.png")
 unoContraDosImg = Imagen("img/boton_uno_contra_dos.png")
 unoContraCpuImg = Imagen("img/boton_uno_contra_cpu.png")
@@ -479,18 +478,15 @@ activadoImg = Imagen("img/caja_activado.png")
 desactivadoImg = Imagen("img/caja_desactivado.png")
 
 # Titulo menu
-
 hexajedrezImg = Imagen("img/HEXajedrez.png")
 
 # Imagen de fondo
-
 fondoRojoImg = Imagen('img/Fondo_Rojo.png')
 fondoAmarilloImg = Imagen('img/Fondo_Amarillo.png')
 fondoCelesteImg = Imagen('img/Fondo_Celeste.png')
 fondoVerdeImg = Imagen('img/Fondo_Verde.jpg')
 
 # Crear Botones
-
 botonUnoContraUno = Boton(0, 285, unoContraUnoImg.obtenerImagen(), 1)
 botonUnoContraDos = Boton(0, 385, unoContraDosImg.obtenerImagen(), 1)
 botonUnoContraCpu = Boton(0, 485, unoContraCpuImg.obtenerImagen(), 1)
@@ -583,7 +579,6 @@ while ejecucion:
 
             if botonOpciones.dibujar("Centrado", opciones[2]):
                 # Abre la pantalla de opciones
-
                 pantallaDeOpciones = True
 
             if botonComoJugar.dibujar("Centrado", opciones[2]):

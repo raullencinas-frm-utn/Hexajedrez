@@ -1,13 +1,12 @@
 import pygame
 
 class Sonido:
-   
     """Una clase para poder reproducir sonidos dependiendo de si el usuario los ha desactivado o no."""
    
     @staticmethod
     def init():
         pygame.init()
-    
+
     @staticmethod
     def sonidoBoton():
         Sonido = pygame.mixer.Sound("sonido/Boton_Sound.mp3")
