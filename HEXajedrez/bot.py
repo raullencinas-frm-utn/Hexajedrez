@@ -264,6 +264,7 @@ class Bot:
             modificador = -9999
         elif HEX_TABLERO.elReyEstaEnJaque(self.color)!=None:
             modificador = -500
+
         
         return +(sumaValores(self.color) - sumaValores("b") - sumaValores(self.enemigo)) + modificador
         

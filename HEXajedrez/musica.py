@@ -14,6 +14,7 @@ class Musica:
                 self.listaCanciones.append(rutaCancion)
     
     def iniciar(self, reproducir_musica:bool):
+        """Se reproduce la musica."""
         if reproducir_musica:
             pygame.mixer.music.load(random.choice(self.listaCanciones))
             pygame.mixer.music.play(-1)    

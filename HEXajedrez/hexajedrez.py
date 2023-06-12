@@ -13,10 +13,10 @@ pygame.init()
 
 # Se crea la ventana principal del programa
 ANCHO_PANTALLA = 1100
-ALTO_PANTALLA = 710
+ALTO_PANTALLA = 700
 
 # Se define el tamanio de la pantalla
-pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
+pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA),pygame.RESIZABLE)
 
 # Titulo de la pantalla
 pygame.display.set_caption("HEXajedrez")
@@ -26,7 +26,7 @@ icono = Imagen("img/hex_icono.png")
 # Se dibuja el icono
 pygame.display.set_icon(icono.obtenerImagen())
 
-# Se define la tipografia
+# Se define la tipografia 
 FUENTE = pygame.font.Font("fnt/8-Bit.TTF", 30)
 # Se define el color de las letras
 BLANCO = (255, 255, 255)
@@ -38,13 +38,12 @@ juegoEjecutandose = [True]
 pantallaDeOpciones = False
 pantallaDificultad = False
 pantallaCreditos = False
-pantallaComoJugar = False
 
 juego = Juego()
 
 # Opciones:
 opciones = [False, "Medio", True, True]
-"""Bot, dificultad, sonido, musica."""
+"""Bot, dificultad, sonido, musica.""" 
 
 creditosDesplazamiento: int = 0  
 
@@ -64,7 +63,6 @@ fondoRojoImg = Imagen('img/Fondo_Rojo.png')
 fondoAmarilloImg = Imagen('img/Fondo_Amarillo.png')
 fondoCelesteImg = Imagen('img/Fondo_Celeste.png')
 fondoVerdeImg = Imagen('img/Fondo_Verde.jpg')
-fondoNaranjaImg = Imagen('img/Fondo_Naranja.jpg')
 
 # Metodos
 metodo = Metodos()
@@ -107,9 +105,20 @@ while ejecucion:
     
     if pantallaDePausa[0] == True:
         if pantallaCreditos:
+            anchoPantalla, altoPantalla = pygame.display.get_window_size()
+            escala_y = altoPantalla / ALTO_PANTALLA
+
             creditosDesplazamiento = metodo.creditos(creditosDesplazamiento)
-            # PANTALLA DE OPCIONES
             
+            
+            if creditosDesplazamiento < - 900 * escala_y:
+        
+                # Se abandona la pantalla de creditos
+                creditosDesplazamiento = 0
+                pantallaCreditos = False
+
+        # PANTALLA DE OPCIONES
+        
         elif pantallaDeOpciones:
             
             # se muestra el fondo verde con los botones de opciones
@@ -274,6 +283,7 @@ while ejecucion:
                 pantallaDeOpciones = False
                 pantallaDificultad = False
                 pantallaCreditos = False
+            
             if evento.key == pygame.K_n:
                 if os.path.exists("registro/Registro de jugadas.txt"):
                     os.remove("registro/Registro de jugadas.txt")

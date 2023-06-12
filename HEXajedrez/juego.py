@@ -60,17 +60,17 @@ class Juego:
         self.piezas = Piezas(colores)
         self.bot = bot
         if bot:
-            self.botNegro = Bot("n","Medio",self.adaptador, colores.endswith("n"))
+            self.botNegro = Bot("n",dificultad, self.adaptador, colores.endswith("n"))
             if colores.endswith("r"):
-
-                self.botRojo = Bot("r","Medio",self.adaptador, True)
-
-        self.continuar = continuar
-        self.reproducir_sonidos = sonidoActivado
-        self.reproducir_musica = musicaActivado
-        self.Musica.iniciar(self.reproducir_musica)
+                self.botRojo = Bot("r",dificultad, self.adaptador, False)
         
-        Sonido().sonidoIniciarJuego(self.reproducir_sonidos)
+        # Variables de inicio
+        self.continuar = continuar
+        self.reproducirSonidos = sonidoActivado
+        self.reproducirMusica = musicaActivado
+        self.Musica.iniciar(self.reproducirMusica)
+        
+        Sonido().sonidoIniciarJuego(self.reproducirSonidos)
         
         # Dimension del juego.
         anchoPantalla, altoPantalla = pygame.display.get_surface().get_size()
@@ -134,7 +134,13 @@ class Juego:
             """Se actualiza el historial de movimientos con el movimiento que se pasa como parametro."""
             if movimiento != None:
                 registro.append(movimiento)
-
+            
+            if not HEX_TABLERO.elReyExiste("b") and len(registro) >= 30:
+                if registro[-1] == registro[-5] == registro[-9] and registro[-3] == registro[-7] == registro[-11] \
+                    and registro[-2] == registro[-6] == registro[-10] and registro[-4] == registro[-8] == registro[-12]:
+                        self.estadoRey = "Tablas (empate)"
+                        mensajeDeEstadoDelRey(self, True)
+            
             return len(registro) > 15
 
         def guardarJuego():
@@ -302,6 +308,13 @@ class Juego:
         actualizaElTurno()
         self.continuar = False
 
+        # Se comienza a reproducir la musica
+        if self.reproducirMusica:
+            if not pygame.mixer.music.get_busy():
+                siguiente_cancion = random.choice(self.lista_canciones)
+                pygame.mixer.music.load(siguiente_cancion)
+                pygame.mixer.music.play(-1)
+
         # Bucle del juego:
         while self.juegoEjecutandose[0]:
             anchoPantalla, altoPantalla = pygame.display.get_surface().get_size()
@@ -315,13 +328,6 @@ class Juego:
             # El radio de un hexagono individual en pantalla, en pixeles.
             ADAPTADOR.radioHexagonal = 34 * escala
             ADAPTADOR.origen = PixelCoord(anchoPantalla / 2 - 204 * escala, altoPantalla / 2)
-            
-            # Se comienza a reproducir la musica
-            if self.reproducir_musica:
-                if not pygame.mixer.music.get_busy():
-                    siguiente_cancion = random.choice(self.lista_canciones)
-                    pygame.mixer.music.load(siguiente_cancion)
-                    pygame.mixer.music.play(-1)
 
             for evento in pygame.event.get():
                 # Si se pulsa la cruz para salir, se cierra la ventana y el programa. 
@@ -368,7 +374,7 @@ class Juego:
                             if not ((self.turnoJugador == 0 and color == "b") or (self.turnoJugador == 1 and color == "n") or (self.turnoJugador == 2 and color == "r")):
                                 continue
                         
-                        Sonido().sonidoTomarPieza(self.reproducir_sonidos)
+                        Sonido().sonidoTomarPieza(self.reproducirSonidos)
                         piezaSeleccionada = piezaEnHexagono
                         coordPiezaInicial = coordSeleccion
                         movimientosValidos = HEX_TABLERO.generarMovimientos(
@@ -378,9 +384,7 @@ class Juego:
                     else:
                         if coordSeleccion in movimientosValidos:
                             guardarJuego()
-
-                            Sonido().sonidoSoltarPieza(self.reproducir_sonidos)
-
+                            Sonido().sonidoSoltarPieza(self.reproducirSonidos)
                             nuevoMov = HEX_TABLERO.moverPieza(
                                 coordPiezaInicial, coordSeleccion, "jugador")
                             if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
@@ -400,9 +404,8 @@ class Juego:
             self.fondoEstadoImg.dibujar(*AREA_ESTADO)
 
             # Se dibuja la linea que va a separar el tablero con la interfaz de turnos.
-
-            pygame.draw.line(PANTALLA, (62, 48, 92), (700+10, 0), (700+10, 700 + 20), 15)
-            
+            pygame.draw.line(PANTALLA, (62, 48, 92), (anchoPantalla / 2 + 155 * escala, altoPantalla / 2 - self.ALTO_PANTALLA / 2 * escala), (anchoPantalla / 2 + 155 * escala, altoPantalla / 2 + self.ALTO_PANTALLA / 2 * escala), int(18 * escala))
+            pygame.draw.line(PANTALLA, (62, 48, 92), (anchoPantalla / 2 + (AREA_ESTADO[0]+200) * escala, 0), (anchoPantalla / 2 + (AREA_ESTADO[0]+200) * escala, altoPantalla), int(18 * escala))
 
             # Dibuja los hexagonos de color.
             for celda in HEX_TABLERO:
@@ -431,12 +434,12 @@ class Juego:
             # Dibuja el borde negro de los hexagonos y dibuja las piezas.
             for celda in HEX_TABLERO:
                 dibujaHex(celda.coordenada, (20, 20, 20))
-                dibujarPiezas(celda, 1)
+                dibujarPiezas(celda, escala)
             
             # Si estamos sosteniendo una pieza se dibuja en la posicion del mouse.
             if piezaSeleccionada:
                 imagen = imagenesDePiezas[piezaSeleccionada]
-                PANTALLA.blit(pygame.transform.scale(imagen, (imagen.get_width() * 1, imagen.get_height() * 1))
+                PANTALLA.blit(pygame.transform.scale(imagen, (imagen.get_width() * escala, imagen.get_height() * escala))
                     , pygame.mouse.get_pos())
             
             # Dibuja los movimientos guardados en el registro
@@ -482,12 +485,8 @@ class Juego:
                 
                 # El bot realiza su movimiento.
                 movimiento = bot.mover(HEX_TABLERO)
-                
-
                 if movimiento != None:
-
-                    Sonido().sonidoSoltarPieza(self.reproducir_sonidos)
-
+                    Sonido().sonidoSoltarPieza(self.reproducirSonidos)
                     (hexInicialBot[self.turnoJugador-1], hexFinalBot[self.turnoJugador-1]), nuevoMov = movimiento
                     if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
                 
