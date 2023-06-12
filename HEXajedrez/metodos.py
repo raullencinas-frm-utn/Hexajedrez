@@ -21,6 +21,7 @@ class Metodos:
             escala = escala_y
         else:
             escala = escala_x
+        
         imagen = pygame.font.Font("fnt/8-Bit.TTF", int(tamanio)).render(texto, True, colorTexto)
         ancho = imagen.get_width()
         alto = imagen.get_height()
@@ -403,7 +404,7 @@ class Metodos:
                     
     def creditos(self, creditosDesplazamiento):
         """Dibuja y desplaza los creditos a lo alto de la pantalla."""
-        creditosDesplazamiento -= 1
+        creditosDesplazamiento -= 2
         self.fondoCelesteImg.dibujar(0, 0)
         BLANCO = (255,255,255)
 

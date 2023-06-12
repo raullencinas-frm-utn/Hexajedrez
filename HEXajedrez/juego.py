@@ -149,7 +149,9 @@ class Juego:
             archivo.write(HEX_TABLERO.piezas.colores+" "+str(self.bot)+" "+str(HEX_TABLERO.turno)+"\n")
             for linea in registroMovimientos:
                 archivo.write(linea+"\n")
+            
             archivo.close()
+
             archivo = None
             archivo = open("registro/Estado tablero.txt","w")
             for celdaElegida in HEX_TABLERO:
@@ -209,6 +211,7 @@ class Juego:
                 anchoPantalla, altoPantalla = pygame.display.get_surface().get_size()
                 escala_x = anchoPantalla / self.ANCHO_PANTALLA
                 escala_y = altoPantalla / self.ALTO_PANTALLA
+
                 if escala_x > escala_y:
                     escala = escala_y
                 else:
@@ -220,6 +223,7 @@ class Juego:
                 if not esFin:
                     if self.botonContinuar.dibujar():
                         ejecucion = False 
+                
                 else:
                     if self.botonFinalizar.dibujar():
                         if os.path.exists("registro/Estado tablero.txt"):
@@ -240,15 +244,18 @@ class Juego:
             """Comprueba las jugadas realizadas y así determina de qué lado es el turno."""
             self.turnoJugador = HEX_TABLERO.turno % len(self.piezas.colores)
             self.turnoTexto = "Blanco" if self.turnoJugador == 0 else " Negro" if self.turnoJugador == 1 else "  Rojo" 
+            
             if not HEX_TABLERO.elReyExiste(self.piezas.colores[self.turnoJugador]):
                 HEX_TABLERO.turno += 1
                 actualizaElTurno()
                 self.continuar = False
                 return
+            
             evaluarEstadoDelRey()
             if HEX_TABLERO.elReyEstaAhogado(self.piezas.colores[self.turnoJugador]):
                 HEX_TABLERO.turno += 1
                 actualizaElTurno()
+            
             self.continuar = False
 
         def escribeTexto(texto: str, tamanio: int, x: any, y: any, fuente):
@@ -266,6 +273,7 @@ class Juego:
                 imagen = pygame.font.SysFont(fuente, tamanio).render(texto, True, (255, 255, 255))
             else:
                 imagen = pygame.font.Font(fuente, tamanio).render(texto, True, (255, 255, 255))
+            
             ancho = imagen.get_width()
             alto = imagen.get_height()
             rectangulo = imagen.get_rect()
@@ -273,8 +281,6 @@ class Juego:
                 x-= self.ANCHO_PANTALLA/2
             y-= self.ALTO_PANTALLA/2
             
-            #self.ancho = self.ancho * escala
-            #self.alto = self.alto * escala
             nueva_y = altoPantalla/2 - (alto * escala)/2 + y * escala
             nueva_x = anchoPantalla/2 - (ancho * escala)/2 + x * escala
             rectangulo[1] = rectangulo[1] * escala 
@@ -294,13 +300,16 @@ class Juego:
                         continue
                     else:
                         if actualizarRegistro(linea[:-1], registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
+                
                 archivo.close()
                 for celdaElegida in HEX_TABLERO:
                     celdaElegida.estado = None
+                
                 archivo = open("registro/Estado tablero.txt","r")
                 for linea in archivo.readlines():
                     palabras:str = linea.split(" ")
                     HEX_TABLERO.__setitem__(HexCoord(float(palabras[0][1:-1]),float(palabras[1][:-1]),float(palabras[2][:-1])), palabras[3][:-1])
+                
                 archivo.close()
                 archivo = None
 
@@ -358,8 +367,8 @@ class Juego:
 
                     # Si no hemos tomado una pieza:
                     if not piezaSeleccionada:
-                        # Si no hay nada que tomar:
 
+                        # Si no hay nada que tomar:
                         if piezaEnHexagono is None:
                             continue
 
@@ -389,16 +398,22 @@ class Juego:
                                 coordPiezaInicial, coordSeleccion, "jugador")
                             if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
                             piezaSeleccionada = coordPiezaInicial = None
+                            
                             if nuevoMov != None:
+                                # Si se mueve de lugar:
                                 actualizaElTurno()
+
+                                # Permite al jugador deshacer este movimiento.
                                 sePuedeDeshacer = True
+                            
                             else: 
+                                # Si no se movio:
                                 sePuedeDeshacer = False
             
-            # se pone la pantalla de color blanco
+            # Se pone la pantalla de color blanco
             PANTALLA.fill((0, 0, 0))
 
-            # se muestra la pantalla del juego con el fondo del juego.
+            # Se muestra la pantalla del juego con el fondo del juego.
             self.fondoJuegoImg.dibujar(0,0)
             self.fondoJuegoLetrasImg.dibujar(*ORIGEN_JUEGO)
             self.fondoEstadoImg.dibujar(*AREA_ESTADO)
@@ -473,9 +488,11 @@ class Juego:
             
             # Realiza los movimientos de un Bot.
             if self.turnoJugador > 0 and self.bot:
+                
                 # Se designa el bot al que le toca jugar.
                 bot = self.botNegro if self.turnoJugador == 1 else self.botRojo
                 if HEX_TABLERO.elReyExiste("b") and not HEX_TABLERO.elReyEstaAhogado("b"):
+                    
                     # Se muestra en pantalla un mensaje mientras piensa el bot.
                     pygame.draw.rect(PANTALLA, (0, 0, 0), (anchoPantalla / 2 - 420*escala, altoPantalla / 2 - 70*escala, 440*escala, 150*escala))
                     
@@ -485,7 +502,10 @@ class Juego:
                 
                 # El bot realiza su movimiento.
                 movimiento = bot.mover(HEX_TABLERO)
+
                 if movimiento != None:
+                    
+                    # Si pudo moverse, realiza el sonido y actualiza los valores del registro.
                     Sonido().sonidoSoltarPieza(self.reproducirSonidos)
                     (hexInicialBot[self.turnoJugador-1], hexFinalBot[self.turnoJugador-1]), nuevoMov = movimiento
                     if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15

@@ -21,6 +21,7 @@ class Boton:
         y= self.y
         anchoPantalla, altoPantalla = pygame.display.get_surface().get_size()
         
+        # Dimension de pantalla
         escala_x = anchoPantalla / self.anchoPantalla
         escala_y = altoPantalla / self.altoPantalla
 
@@ -28,13 +29,12 @@ class Boton:
             escala = escala_y
         else:
             escala = escala_x
-        #self.ancho = self.ancho * escala
-        #self.alto = self.alto * escala
+
         if x != 0: 
             x -= self.anchoPantalla/2
         y -= self.altoPantalla/2
         
-        
+        # Redimension de pantalla. 
         nueva_y = altoPantalla/2 - (self.alto * escala)/2 + y * escala
         nueva_x = anchoPantalla/2 - (self.ancho * escala)/2 + x * escala
     
@@ -45,6 +45,7 @@ class Boton:
         accion = False
         # Obtenemos posicion del mouse
         pos = pygame.mouse.get_pos()
+        
         # Revisar que el mouse se encuentre encima del boton y haga click
 
         if rectangulo.collidepoint(pos):

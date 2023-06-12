@@ -54,7 +54,11 @@ class Tablero:
         elif type(item) is int:
             return item in self.celdas.keys()
 
+    
     def __str__(self) -> str:
+        """
+        Devuelve en formato String, la posicion de las fichas en el tablero.
+        """
         FEN_dict = {
             None: "xx",
 
@@ -146,6 +150,7 @@ class Tablero:
         # Generar un mapa inicial.
         mapaInicial: Tablero = Tablero.generarConRadio(5, colores)
 
+        # Posiciona las fichas en el tablero, según las reglas de McCooey
         for pieza, listaPosiciones in McCooeyPos.items():
             for posicion in listaPosiciones:
                 mapaInicial[HexCoord(*posicion)] = pieza
@@ -304,6 +309,7 @@ class Tablero:
         """Dibuja el menú de promoción y devuelve la pieza seleccionada."""
         PANTALLA = pygame.display.get_surface()
         
+        # Se carga imagen de promoción de peón.
         imagenDama = Imagen(f"img/{color}_dama.png")
         imagenAlfil = Imagen(f"img/{color}_alfil.png")
         imagenTorre = Imagen(f"img/{color}_torre.png")
@@ -317,6 +323,7 @@ class Tablero:
 
         selected_piece = None
         ejecucion = True
+        # Se muestra menú para promoción
         while ejecucion:
             anchoPantalla, altoPantalla = pygame.display.get_window_size()
             escala_x = anchoPantalla / PANTALLA.get_width()
@@ -325,22 +332,27 @@ class Tablero:
                 escala = escala_y
             else:
                 escala = escala_x
-                
+            
+            # Dimensión del menú promoción     
             pygame.draw.rect(PANTALLA, (0, 0, 0), (anchoPantalla / 2 - 420*escala, altoPantalla / 2 - 70*escala, 440*escala, 150*escala))
             
             fuente = pygame.font.SysFont("arialblack", int(15 * escala))
             text = fuente.render("¡Selecciona pieza de promocion de peon!", True, (255, 255, 255))
             PANTALLA.blit(text, (anchoPantalla / 2 - 365 * escala, altoPantalla / 2 - 50 * escala))
 
+            # Si promociona a Dama
             if botonDama.dibujar():
                 selected_piece = "dama"
                 ejecucion = False
+            # Si promociona a Alfil
             elif botonAlfil.dibujar():
                 selected_piece = "alfil"
                 ejecucion = False
+            # Si promociona a Torre
             elif botonTorre.dibujar():
                 selected_piece = "torre"
                 ejecucion = False
+            # Si promociona a Caballo
             elif botonCaballo.dibujar():
                 selected_piece = "caballo"
                 ejecucion = False
@@ -498,7 +510,8 @@ class Tablero:
     def jaqueAlMoverse(self, color: str, posInicial: HexCoord, posFinal: HexCoord) -> bool:
         """Revisa si el rey de un especifico color se encuentra en Jaque tras un movimiento."""
         respaldo: Optional[str] = self[posFinal]
-
+        
+        # Mueve la pieza y si hay jaque, devuelve la pieza a su posición original.
         self.moverPieza(posInicial, posFinal,"")
         estadoDeJaque: bool = self.elReyEstaEnJaque(color)!=None
         self.moverPieza(posFinal, posInicial,"")
