@@ -7,8 +7,9 @@ class Metodos:
     def __init__(self) -> None:
         self.fondoNaranjaImg = Imagen('img/Fondo_Naranja.jpg')
         self.hexajedrezCreditosImg = Imagen("img/HEXajedrez-creditos.png")
-        self.botonFinalizarComoJugar = Boton(100, 680, pygame.font.Font("fnt/8-Bit.TTF", 20).render("Finalizar", True, (255, 255, 255)))
-        self.botonContinuarComoJugar = Boton(1000, 680, pygame.font.Font("fnt/8-Bit.TTF", 20).render("Continuar", True, (255, 255, 255)))
+        self.botonFinalizarComoJugar = Boton(100, 20, pygame.font.Font("fnt/8-Bit.TTF", 20).render("Finalizar", True, (255, 255, 255)))
+        self.botonSiguienteComoJugar = Boton(1000, 680, pygame.font.Font("fnt/8-Bit.TTF", 20).render("Siguiente", True, (255, 255, 255)))
+        self.botonAnteriorComoJugar = Boton(100, 680, pygame.font.Font("fnt/8-Bit.TTF", 20).render("Anterior", True, (255, 255, 255)))
         self.fondoCelesteImg = Imagen('img/Fondo_Celeste.png')
 
     def dibujarTexto(texto, tamanio, colorTexto, x, y):
@@ -358,10 +359,13 @@ class Metodos:
             }
         }
         
-
-        for i in range(57):
-            siguiente = True
+        # Se muestran las imagenes una por una.
+        i = -1
+        while (i <= 56):
+            i += 1
             
+            # Se realiza un bucle que espera a que el jugador avance a la siguiente imagen.
+            siguiente = True
             while siguiente:
                 anchoPantalla, altoPantalla = pygame.display.get_surface().get_size()
                 escala_x = anchoPantalla / 1100
@@ -384,10 +388,16 @@ class Metodos:
                 Metodos.dibujarCuadroTexto(info["descripcion"], 800, 170)
 
                 if not esFin:
-                    if self.botonContinuarComoJugar.dibujar():
+                    if self.botonSiguienteComoJugar.dibujar():
                         if i == 55:
                             esFin = True
                         siguiente = False
+                
+                if i != 0:
+                    if self.botonAnteriorComoJugar.dibujar():
+                        esFin = False
+                        i = i - 1
+                
                 if self.botonFinalizarComoJugar.dibujar():
                     siguiente = False
                     i = 58
@@ -396,6 +406,18 @@ class Metodos:
                     if evento.type == pygame.QUIT:
                         pygame.quit()
                         exit()
+                    
+                    if evento.type == pygame.KEYDOWN:
+                        if (evento.key == pygame.K_SPACE or evento.key == pygame.K_RIGHT) and not esFin:
+                            if i == 55:
+                                esFin = True
+                            
+                            siguiente = False
+                        
+                        if evento.key == pygame.K_LEFT:
+                            if i != 0:
+                                esFin = False
+                                i = i - 1
                 
                 pygame.display.flip()
 
