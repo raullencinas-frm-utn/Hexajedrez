@@ -9,6 +9,7 @@ from imagen import Imagen
 from hexPixelAdaptador import HexPixelAdaptador
 
 
+
 class Bot:
     """Clase que realiza los movimientos de la CPU."""
     cacheMinimax = dict()
@@ -53,7 +54,7 @@ class Bot:
         # Se guardan los valores para dibujar la pieza.
         reloj = pygame.time.Clock()
         piezaAMover = tablero[mejorMovimiento.__getitem__(1)]
-        imagenBot = Imagen(f"img/{piezaAMover}.png").redimensionar(60, 60)
+        imagenBot = Imagen(f"img/{piezaAMover}.png").obtenerImagen()
         coordenadas_iniciales = self.adaptador.hexAPixel(mejorMovimiento.__getitem__(0))
         coordenadas_finales = self.adaptador.hexAPixel(mejorMovimiento.__getitem__(1))
         dx = coordenadas_finales[0] - coordenadas_iniciales[0]
@@ -185,9 +186,14 @@ class Bot:
         return 1
     
     def minimax(self, HEX_TABLERO: Tablero, profundidad: int, alfa: float, beta: float, turno: int) -> float:
-        pygame.event.pump()
         """Realiza una búsqueda minimax hasta una profundidad determinada."""
+
+        pygame.event.pump()
+
+        # Se guarda el estado actual del tablero en una variable.
         hashEstado = hash(HEX_TABLERO.__str__())
+
+        # Si el estado actual se encuentra en la cache, quiere decir que ya se ha realizado el calculo. Se retorna.
         if hashEstado in self.cacheMinimax:
             return self.cacheMinimax[hashEstado]
 
@@ -199,20 +205,25 @@ class Bot:
         puntuacionFinal: float = math.inf * (-1) ** (turno == 0)
         movimientos = ()
 
+        # Si se evalua el turno del propio:
         if turno == 0:
             movimientos = HEX_TABLERO.movimientosPorColor(self.color)
         
+        # Si se evalua el turno del jugador blanco:
         elif turno == 1:
             if HEX_TABLERO.elReyExiste("b"):
                 # Prioriza ahogar / hacer Jaque Mate al rey blanco ante todo.
                 if HEX_TABLERO.elReyEstaAhogado("b"):
                     return self.evaluar(HEX_TABLERO)
+                
                 movimientos = HEX_TABLERO.movimientosPorColor("b")
         
+        # Si se evalua el turno del mismo:
         else:
             if HEX_TABLERO.elReyExiste(self.enemigo):
                 movimientos = HEX_TABLERO.movimientosPorColor(self.enemigo)
 
+        # Se empieza un contador en 0 para evaluar si tiene o no movimientos.
         contador = 0
         for (posInicial, posFinal) in movimientos:
             contador += 1
@@ -222,17 +233,22 @@ class Bot:
             HEX_TABLERO.moverPieza(posFinal, posInicial,"")
             HEX_TABLERO[posFinal] = tableroRespaldo
 
-            # Poda alfa-beta.
+            # PODA ALFA-BETA.
+            # Si el turno es el propio, se cuenta como maximo.
             if turno == 0:
                 puntuacionFinal = max(resultado, puntuacionFinal)
                 alfa = max(alfa, resultado)
+            
+            # De otra forma, se cuenta como minimo.
             else:
                 puntuacionFinal = min(resultado, puntuacionFinal)
                 beta = min(beta, resultado)
             
+            # Si alfa es menor o igual a beta, se descarta la evaluacion del movimiento.
             if alfa <= beta:
                 break
         
+        # Si no se encontro ningun movimiento, se evalua el siguiente jugador.
         if contador == 0:
             resultado: float = self.minimax(HEX_TABLERO, ( profundidad - 1), alfa, beta, (turno+1)%len(HEX_TABLERO.piezas.colores))
 
@@ -241,8 +257,11 @@ class Bot:
             else:
                 puntuacionFinal = min(resultado, puntuacionFinal)
 
+        # Se guarda la puntuacion final en el cache, junto al estado del tablero.
         self.cacheMinimax[hashEstado] = puntuacionFinal
+
         pygame.event.pump()
+
         return puntuacionFinal
     
     def evaluar(self, HEX_TABLERO: Tablero) -> float:
@@ -251,18 +270,24 @@ class Bot:
         sumaValores = lambda col: sum(map(tableroAValores, HEX_TABLERO.celdasPiezasMismoColor(col)))
         modificador: int = 0
         
+        # Evalua los estados del rey blanco
         if HEX_TABLERO.elReyEstaAhogado("b"):
             modificador = 2000
         elif HEX_TABLERO.elReyEstaEnJaque("b")!=None:
             modificador = 500
+        
+        # Evalua los estados del rey del bot opuesto
         elif HEX_TABLERO.elReyEstaAhogado(self.enemigo):
             modificador = 800
         elif HEX_TABLERO.elReyEstaEnJaque(self.enemigo)!=None:
             modificador = 500
+        
+        # Evalua los estados de su propio rey
         elif HEX_TABLERO.elReyEstaAhogado(self.color):
             modificador = -9999
         elif HEX_TABLERO.elReyEstaEnJaque(self.color)!=None:
             modificador = -500
+
         
         return +(sumaValores(self.color) - sumaValores("b") - sumaValores(self.enemigo)) + modificador
         
