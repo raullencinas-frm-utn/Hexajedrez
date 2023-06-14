@@ -41,9 +41,11 @@ class Juego:
         # Lista de movimientos realizados por todos los jugadores.
         self.desplazamientoArribaImg = Imagen("img/boton_Arriba.png")
         self.desplazamientoAbajoImg = Imagen("img/boton_Abajo.png")
+        self.pausaImg = Imagen("img/boton_Pausa.png")
         self.deshacerImg = Imagen("img/boton_Deshacer.png")
         self.botonDesplazamientoArriba = Boton(1060, 125, self.desplazamientoArribaImg.obtenerImagen())
         self.botonDesplazamientoAbajo = Boton(1060, 650, self.desplazamientoAbajoImg.obtenerImagen())
+        self.botonPausa = Boton(673, 25, self.pausaImg.obtenerImagen())
         self.botonDeshacer = Boton(668, 674, self.deshacerImg.obtenerImagen())
         self.botonContinuar = Boton(350, 370, pygame.font.Font("fnt/8-Bit.TTF", 10).render("Continuar", True, (255, 255, 255)))
         self.botonFinalizar = Boton(350, 370, pygame.font.Font("fnt/8-Bit.TTF", 10).render("Finalizar", True, (255, 255, 255)))
@@ -199,6 +201,9 @@ class Juego:
             # Previene al mensaje de aparecer al continuar el juego.
             if self.continuar:
                 return
+            
+            pygame.display.flip()
+
             # Si se hace un jaque al Bot no se muestra.
             if not mate and (self.bot) and (self.turnoJugador > 0):
                 return
@@ -476,6 +481,12 @@ class Juego:
                     actualizaElTurno()
                     sePuedeDeshacer = False
             
+            # Botón de pausa
+            if self.botonPausa.dibujar():
+                guardarJuego()
+                pausa[0] = not pausa[0]
+                juegoEjecutandose[0] = False
+            
             # Describe de quien es el turno:
             escribeTexto("Turno del jugador", 20, (AREA_JUEGO[0]+210), 38, "fnt/8-Bit.TTF")
             escribeTexto(self.turnoTexto, 20, (AREA_JUEGO[0]+205), 64, "fnt/8-Bit.TTF")
@@ -494,7 +505,10 @@ class Juego:
                 if HEX_TABLERO.elReyExiste("b") and not HEX_TABLERO.elReyEstaAhogado("b"):
                     
                     # Se muestra en pantalla un mensaje mientras piensa el bot.
-                    pygame.draw.rect(PANTALLA, (0, 0, 0), (anchoPantalla / 2 - 420*escala, altoPantalla / 2 - 70*escala, 440*escala, 150*escala))
+                    pantallaEspera = pygame.Surface((440 * escala, 150 * escala))
+                    pantallaEspera.set_alpha(128)
+                    pantallaEspera.fill((0,0,0))
+                    PANTALLA.blit(pantallaEspera, (anchoPantalla / 2 - 420*escala, altoPantalla / 2 - 70*escala))
                     
                     escribeTexto("El jugador "+("Negro" if self.turnoJugador == 1 else "Rojo"), 20, 350, 330, "arialblack")
                     escribeTexto("está jugando, espere por favor...", 20, 350, 370, "arialblack")
@@ -511,4 +525,5 @@ class Juego:
                     if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
                 
                 actualizaElTurno()
+                pantallaEspera = None
                 

@@ -55,6 +55,7 @@ unoContraUnoImg = Imagen("img/boton_uno_contra_uno.png")
 unoContraDosImg = Imagen("img/boton_uno_contra_dos.png")
 unoContraCpuImg = Imagen("img/boton_uno_contra_cpu.png")
 unoContraDosCpuImg = Imagen("img/boton_uno_contra_dos_cpu.png")
+pausaImg = Imagen("img/boton_Pausa.png")
 activadoImg = Imagen("img/caja_activado.png")
 desactivadoImg = Imagen("img/caja_desactivado.png")
 hexajedrezImg = Imagen("img/HEXajedrez.png")
@@ -69,10 +70,11 @@ fondoVerdeImg = Imagen('img/Fondo_Verde.jpg')
 metodo = Metodos()
 
 # Crear Botones del menu principal
-botonUnoContraUno = Boton(0, 285, unoContraUnoImg.obtenerImagen())
-botonUnoContraDos = Boton(0, 385, unoContraDosImg.obtenerImagen())
-botonUnoContraCpu = Boton(0, 485, unoContraCpuImg.obtenerImagen())
-botonUnoContraDosCpu = Boton(0, 585, unoContraDosCpuImg.obtenerImagen())
+botonUnoContraUno = Boton(0, 485, unoContraUnoImg.obtenerImagen())
+botonUnoContraDos = Boton(0, 585, unoContraDosImg.obtenerImagen())
+botonUnoContraCpu = Boton(0, 285, unoContraCpuImg.obtenerImagen())
+botonUnoContraDosCpu = Boton(0, 385, unoContraDosCpuImg.obtenerImagen())
+botonPausa = Boton(1075, 25, pausaImg.obtenerImagen())
 
 # Botones del menu de pausa
 botonContinuar = Boton(0, 210, FUENTE.render("Continuar", True, BLANCO))
@@ -140,7 +142,7 @@ while ejecucion:
                 # Se maximiza la pantalla
                 if opciones[4]:
                     botonPantallaCompleta.imagen = FUENTE.render("Minimizar", True, BLANCO)
-                    pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA), pygame.FULLSCREEN)
+                    pantalla = pygame.display.set_mode((1360, 738), pygame.RESIZABLE)
 
                 # Se minimiza la pantalla
                 else:
@@ -159,7 +161,15 @@ while ejecucion:
 
             # Se muestra las distintas opciones de dificultad.
             if pantallaDificultad:
-
+                desactivadoImg.dibujar(370, 295)
+                desactivadoImg.dibujar(650, 295)
+                desactivadoImg.dibujar(925, 295)
+                if opciones[1] == "Facil":
+                    activadoImg.dibujar(370, 295)
+                elif opciones[1] == "Medio":
+                    activadoImg.dibujar(650, 295)
+                else:
+                    activadoImg.dibujar(925, 295)
                 # Si se elige la dificultad facil:
                 if botonFacil.dibujar():
                     opciones[1] = "Facil"
@@ -258,7 +268,9 @@ while ejecucion:
         if botonUnoContraDosCpu.dibujar():
             juegoEjecutandose[0] = True
             juego.iniciar(opciones[1], pantallaDePausa, juegoEjecutandose, "bnr", True, False, opciones[2], opciones[3])
-    
+        # Boton de pausa
+        if botonPausa.dibujar():
+            pantallaDePausa[0] = True
 
     # PANTALLA DE TITULO
     else:
