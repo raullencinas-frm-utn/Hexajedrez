@@ -54,7 +54,11 @@ class Tablero:
         elif type(item) is int:
             return item in self.celdas.keys()
 
+    
     def __str__(self) -> str:
+        """
+        Devuelve en formato String, la posicion de las fichas en el tablero.
+        """
         FEN_dict = {
             None: "xx",
 
@@ -146,6 +150,7 @@ class Tablero:
         # Generar un mapa inicial.
         mapaInicial: Tablero = Tablero.generarConRadio(5, colores)
 
+        # Posiciona las fichas en el tablero, según las reglas de McCooey
         for pieza, listaPosiciones in McCooeyPos.items():
             for posicion in listaPosiciones:
                 mapaInicial[HexCoord(*posicion)] = pieza
@@ -303,40 +308,51 @@ class Tablero:
     def dibujarMenuPromocion(self, color: str) -> str:
         """Dibuja el menú de promoción y devuelve la pieza seleccionada."""
         PANTALLA = pygame.display.get_surface()
-        fuente = pygame.font.SysFont("arialblack", 25)
-
+        
+        # Se carga imagen de promoción de peón.
         imagenDama = Imagen(f"img/{color}_dama.png")
         imagenAlfil = Imagen(f"img/{color}_alfil.png")
         imagenTorre = Imagen(f"img/{color}_torre.png")
         imagenCaballo = Imagen(f"img/{color}_caballo.png")
 
         # Se crean los botones.
-        botonDama = Boton(180, 350, imagenDama.obtenerImagen())
-        botonAlfil = Boton(280, 350, imagenAlfil.obtenerImagen())
-        botonTorre = Boton(380, 350, imagenTorre.obtenerImagen())
-        botonCaballo = Boton(480, 350, imagenCaballo.obtenerImagen())
+        botonDama = Boton(PANTALLA.get_width()/2-345, PANTALLA.get_height()/2 + 10, imagenDama.obtenerImagen())
+        botonAlfil = Boton(PANTALLA.get_width()/2-245, PANTALLA.get_height()/2 + 10, imagenAlfil.obtenerImagen())
+        botonTorre = Boton(PANTALLA.get_width()/2-145, PANTALLA.get_height()/2 + 10, imagenTorre.obtenerImagen())
+        botonCaballo = Boton(PANTALLA.get_width()/2-45, PANTALLA.get_height()/2 + 10, imagenCaballo.obtenerImagen())
 
         selected_piece = None
         ejecucion = True
+        # Se muestra menú para promoción
         while ejecucion:
-            pygame.draw.rect(PANTALLA, (0, 0, 0), (150, 280, 400, 150))
+            anchoPantalla, altoPantalla = pygame.display.get_window_size()
+            escala_x = anchoPantalla / PANTALLA.get_width()
+            escala_y = altoPantalla / PANTALLA.get_height()
+            if escala_x > escala_y:
+                escala = escala_y
+            else:
+                escala = escala_x
+            
+            # Dimensión del menú promoción     
+            pygame.draw.rect(PANTALLA, (0, 0, 0), (anchoPantalla / 2 - 420*escala, altoPantalla / 2 - 70*escala, 440*escala, 150*escala))
+            
+            fuente = pygame.font.SysFont("arialblack", int(15 * escala))
             text = fuente.render("¡Selecciona pieza de promocion de peon!", True, (255, 255, 255))
-            PANTALLA.blit(text, (180, 310))
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    ejecucion = False
-                    pygame.quit()
-                    exit()
+            PANTALLA.blit(text, (anchoPantalla / 2 - 365 * escala, altoPantalla / 2 - 50 * escala))
 
+            # Si promociona a Dama
             if botonDama.dibujar():
                 selected_piece = "dama"
                 ejecucion = False
+            # Si promociona a Alfil
             elif botonAlfil.dibujar():
                 selected_piece = "alfil"
                 ejecucion = False
+            # Si promociona a Torre
             elif botonTorre.dibujar():
                 selected_piece = "torre"
                 ejecucion = False
+            # Si promociona a Caballo
             elif botonCaballo.dibujar():
                 selected_piece = "caballo"
                 ejecucion = False
@@ -385,6 +401,7 @@ class Tablero:
                 colorPieza = "blanco" if piezaMovida[0]=="b" else "negro" if piezaMovida[0]=="n" else "rojo"
                 if piezaMovida[2:].endswith("a"):
                     colorPieza = colorPieza[:-1]+"a"
+                
                 return(piezaMovida[2:]+" "+colorPieza+" "+Tablero.encontrarCoordenadaReal(posInicial)+" a "+Tablero.encontrarCoordenadaReal(posFinal))
 
     def elReyExiste(self, color: str) -> bool:
@@ -480,6 +497,7 @@ class Tablero:
             # Si ninguna pieza puede moverse significa que se encuentra en Jaque Mate:
             if self.elReyEstaAhogado(color):
                 return True
+        
         return False
     
     def elReyEstaAhogado(self, color: str) -> bool:
@@ -492,7 +510,8 @@ class Tablero:
     def jaqueAlMoverse(self, color: str, posInicial: HexCoord, posFinal: HexCoord) -> bool:
         """Revisa si el rey de un especifico color se encuentra en Jaque tras un movimiento."""
         respaldo: Optional[str] = self[posFinal]
-
+        
+        # Mueve la pieza y si hay jaque, devuelve la pieza a su posición original.
         self.moverPieza(posInicial, posFinal,"")
         estadoDeJaque: bool = self.elReyEstaEnJaque(color)!=None
         self.moverPieza(posFinal, posInicial,"")

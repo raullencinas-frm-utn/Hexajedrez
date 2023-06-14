@@ -19,71 +19,75 @@ from musica import Musica
 class Juego:
 
 
-    def __init__(self, x, colores: str, bot: bool, continuar: bool, sonidoActivado: bool, musicaActivado: bool):
-
+    def __init__(self):
         """Constructor de clase Juego."""
+        self.ANCHO_PANTALLA , self.ALTO_PANTALLA = 1100, 700
+
+        # Dimension del juego.
+        self.AREA_JUEGO: PixelCoord = PixelCoord(self.ALTO_PANTALLA, self.ALTO_PANTALLA)
+
+        # Dimension adicional necesaria para la GUI.
+        self.AREA_ESTADO: PixelCoord = PixelCoord(self.ANCHO_PANTALLA*0.33, 0)
+        self.ORIGEN_JUEGO: PixelCoord = self.AREA_JUEGO/2
+        self.hexagonoRadio: float = 34
+        self.adaptador: HexPixelAdaptador = HexPixelAdaptador(self.AREA_JUEGO, self.ORIGEN_JUEGO, self.hexagonoRadio)
+
+        # Variables
+        self.Musica = Musica("sonido/musica/")
+        self.fondoJuegoImg= Imagen("img/Fondo_Juego.png")
+        self.fondoJuegoLetrasImg= Imagen("img/Fondo_Juego_Letras.png")
+        self.fondoEstadoImg= Imagen("img/Fondo_Estado.png")
+        
+        # Lista de movimientos realizados por todos los jugadores.
+        self.desplazamientoArribaImg = Imagen("img/boton_Arriba.png")
+        self.desplazamientoAbajoImg = Imagen("img/boton_Abajo.png")
+        self.pausaImg = Imagen("img/boton_Pausa.png")
+        self.deshacerImg = Imagen("img/boton_Deshacer.png")
+        self.botonDesplazamientoArriba = Boton(1060, 125, self.desplazamientoArribaImg.obtenerImagen())
+        self.botonDesplazamientoAbajo = Boton(1060, 650, self.desplazamientoAbajoImg.obtenerImagen())
+        self.botonPausa = Boton(673, 25, self.pausaImg.obtenerImagen())
+        self.botonDeshacer = Boton(668, 674, self.deshacerImg.obtenerImagen())
+        self.botonContinuar = Boton(350, 370, pygame.font.Font("fnt/8-Bit.TTF", 10).render("Continuar", True, (255, 255, 255)))
+        self.botonFinalizar = Boton(350, 370, pygame.font.Font("fnt/8-Bit.TTF", 10).render("Finalizar", True, (255, 255, 255)))
+
+    def iniciar(self, dificultad: str, pausa, juegoEjecutandose, colores: str, bot: bool, continuar: bool, sonidoActivado: bool, musicaActivado: bool):
+        """Iniciar el juego."""
+        # Si se esta continuando, se carga la partida
         if continuar:
-
             linea:str = open("registro/Registro de jugadas.txt","r").readline().split(" ")
-
             colores = linea[0]
             bot = linea[1]=="True"
 
-        # Dimension del juego.
-        self.AREA_JUEGO: PixelCoord = PixelCoord(x*0.63, x*0.63)
-
-        # Dimension adicional necesaria para la GUI.
-        self.AREA_ESTADO: PixelCoord = PixelCoord(x*0.36, 0)
-        self.ORIGEN_JUEGO: PixelCoord = self.AREA_JUEGO/2
-        self.hexagonoRadio: float = 35.5
+        # Piezas del juego
         self.piezas = Piezas(colores)
-        self.adaptador: HexPixelAdaptador = HexPixelAdaptador(self.AREA_JUEGO, self.ORIGEN_JUEGO, self.hexagonoRadio)
         self.bot = bot
-
         if bot:
-            self.botNegro = Bot("n","Medio",self.adaptador, colores.endswith("n"))
+            self.botNegro = Bot("n",dificultad, self.adaptador, colores.endswith("n"))
             if colores.endswith("r"):
-
-                self.botRojo = Bot("r","Medio",self.adaptador, True)
-
+                self.botRojo = Bot("r",dificultad, self.adaptador, False)
+        
+        # Variables de inicio
         self.continuar = continuar
-        self.Musica = Musica("sonido/musica/")
-        self.reproducir_sonidos = sonidoActivado
-        self.reproducir_musica = musicaActivado
-        self.Musica.iniciar(self.reproducir_musica)
-
-    def iniciar(self, dificultad: str, pausa, juegoEjecutandose):
-        Sonido().sonidoIniciarJuego(self.reproducir_sonidos)
-        """Iniciar el juego."""
-        # pygame.init()
-        if self.bot:
-            self.botNegro.dificultad = dificultad
-            if self.piezas.colores.endswith("r"):
-                self.botRojo.dificultad = dificultad
-
+        self.reproducirSonidos = sonidoActivado
+        self.reproducirMusica = musicaActivado
+        self.Musica.iniciar(self.reproducirMusica)
+        
+        Sonido().sonidoIniciarJuego(self.reproducirSonidos)
+        
         # Dimension del juego.
-
+        anchoPantalla, altoPantalla = pygame.display.get_surface().get_size()
+        escala_x = anchoPantalla / self.ANCHO_PANTALLA
+        escala_y = altoPantalla / self.ALTO_PANTALLA
+        if escala_x > escala_y:
+            escala = escala_y
+        else:
+            escala = escala_x
+        
         AREA_JUEGO = self.AREA_JUEGO
         
         # Dimension adicional necesaria para la GUI.
         AREA_ESTADO = self.AREA_ESTADO
-
-        # Fuente de AREA_ESTADO
-
-
-        FUENTE = pygame.font.Font("fnt/8-Bit.TTF", 10)
-
-        FUENTE_MINUSCULA = pygame.font.SysFont("arialblack", 20)
-
-
-        # Ancho y alto del juego.
-
-
-        ANCHO_JUEGO, ALTO_JUEGO = AREA_JUEGO
-
-        ANCHO_ESTADO = AREA_ESTADO[0]
-
-
+        
         # Origen central del juego.
         ORIGEN_JUEGO = self.ORIGEN_JUEGO
         
@@ -92,11 +96,7 @@ class Juego:
 
         # Tablero de juego.
         HEX_TABLERO: Tablero = Tablero.generarMcCooey(self.piezas.colores)
-
-        # El radio de un hexagono individual en pantalla, en pixeles.
-
-        HEX_RADIO: self.hexagonoRadio
-
+        
         # Lista de los colores de las celdas.
         HEX_COLORES: list[tuple] = [(60, 120, 60), (40, 40, 200), (184, 40, 50)]
 
@@ -129,33 +129,20 @@ class Juego:
         registroMovimientos = [] 
         sePuedeDeshacer = False
 
-
-        # Lista de movimientos realizados por todos los jugadores.
-        
-
         desplazamientoRegistro = 0
-
-
-        desplazamientoArribaImg = Imagen("img/boton_Arriba.png")
-
-        desplazamientoAbajoImg = Imagen("img/boton_Abajo.png")
-
-        deshacerImg = Imagen("img/boton_Deshacer.png")
-
-
-        botonDesplazamientoArriba = Boton(1030, 125, desplazamientoArribaImg.obtenerImagen())
-
-        botonDesplazamientoAbajo = Boton(1030, 650, desplazamientoAbajoImg.obtenerImagen())
-
-        botonDeshacer = Boton(10, 10, deshacerImg.obtenerImagen())
-
-
+        
         @staticmethod
         def actualizarRegistro(movimiento, registro) -> bool:
             """Se actualiza el historial de movimientos con el movimiento que se pasa como parametro."""
             if movimiento != None:
                 registro.append(movimiento)
-
+            
+            if not HEX_TABLERO.elReyExiste("b") and len(registro) >= 30:
+                if registro[-1] == registro[-5] == registro[-9] and registro[-3] == registro[-7] == registro[-11] \
+                    and registro[-2] == registro[-6] == registro[-10] and registro[-4] == registro[-8] == registro[-12]:
+                        self.estadoRey = "Tablas (empate)"
+                        mensajeDeEstadoDelRey(self, True)
+            
             return len(registro) > 15
 
         def guardarJuego():
@@ -164,7 +151,9 @@ class Juego:
             archivo.write(HEX_TABLERO.piezas.colores+" "+str(self.bot)+" "+str(HEX_TABLERO.turno)+"\n")
             for linea in registroMovimientos:
                 archivo.write(linea+"\n")
+            
             archivo.close()
+
             archivo = None
             archivo = open("registro/Estado tablero.txt","w")
             for celdaElegida in HEX_TABLERO:
@@ -212,27 +201,42 @@ class Juego:
             # Previene al mensaje de aparecer al continuar el juego.
             if self.continuar:
                 return
+            
+            pygame.display.flip()
+
             # Si se hace un jaque al Bot no se muestra.
             if not mate and (self.bot) and (self.turnoJugador > 0):
                 return
             
             # Si hay como mucho dos reyes y un rey se encuentra en jaque mate o ahogado, se finaliza el juego.
             esFin: bool = mate and HEX_TABLERO.contarReyes() <= 2
-
-            botonTitulo: str = "Finalizar" if esFin else "Continuar"
-
-            botonContinuar = Boton(350-FUENTE.render(botonTitulo, True, (255, 255, 255)).get_width()/2, 370, FUENTE.render(botonTitulo, True, (255, 255, 255)))
-
-
             ejecucion = True
 
             while ejecucion:
+                anchoPantalla, altoPantalla = pygame.display.get_surface().get_size()
+                escala_x = anchoPantalla / self.ANCHO_PANTALLA
+                escala_y = altoPantalla / self.ALTO_PANTALLA
 
-                pygame.draw.rect(PANTALLA, (0, 0, 0), (150, 280, 400, 150))
-
-                text = FUENTE_MINUSCULA.render(self.estadoRey, True, (255, 255, 255))
-
-                PANTALLA.blit(text, (350-text.get_width()/2, 330))
+                if escala_x > escala_y:
+                    escala = escala_y
+                else:
+                    escala = escala_x
+                
+                pygame.draw.rect(PANTALLA, (0, 0, 0), (anchoPantalla / 2 - 420*escala, altoPantalla / 2 - 70*escala, 440*escala, 150*escala))
+                escribeTexto(self.estadoRey, 20, 350 , 330, "arialblack")
+                
+                if not esFin:
+                    if self.botonContinuar.dibujar():
+                        ejecucion = False 
+                
+                else:
+                    if self.botonFinalizar.dibujar():
+                        if os.path.exists("registro/Estado tablero.txt"):
+                            os.remove("registro/Estado tablero.txt")
+                        juegoEjecutandose[0] = False
+                        ejecucion = False 
+                
+                pygame.display.flip() 
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -241,75 +245,53 @@ class Juego:
                         exit()
                   
 
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-
-                        mouse_pos = pygame.mouse.get_pos()
-
-                        if botonContinuar.rectangulo.collidepoint(mouse_pos):
-
-                            if esFin:
-
-                                juegoEjecutandose[0] = False
-
-                                if os.path.exists("registro/Estado tablero.txt"):
-
-                                    os.remove("registro/Estado tablero.txt")
-
-                            ejecucion = False
-                        
-
-                botonContinuar.dibujar()
-                
-
-                pygame.display.flip()     
-                
-
         def actualizaElTurno():
             """Comprueba las jugadas realizadas y así determina de qué lado es el turno."""
             self.turnoJugador = HEX_TABLERO.turno % len(self.piezas.colores)
             self.turnoTexto = "Blanco" if self.turnoJugador == 0 else " Negro" if self.turnoJugador == 1 else "  Rojo" 
+            
             if not HEX_TABLERO.elReyExiste(self.piezas.colores[self.turnoJugador]):
-
-                if self.bot:
-
-                    if  self.turnoJugador > 0:
-
-                        if self.turnoJugador == 1: 
-
-                            self.botNegro = None
-
-                        else: 
-
-                            self.botRojo = None
-
-                    else:
-
-                        self.estadoRey = "Fin del juego"
-
-                        mensajeDeEstadoDelRey(self,True)
-
-
                 HEX_TABLERO.turno += 1
                 actualizaElTurno()
                 self.continuar = False
                 return
+            
             evaluarEstadoDelRey()
             if HEX_TABLERO.elReyEstaAhogado(self.piezas.colores[self.turnoJugador]):
                 HEX_TABLERO.turno += 1
                 actualizaElTurno()
+            
             self.continuar = False
-                
 
-        def escribeTexto(texto: str,tamanio: int, x: any, y: any, colorTexto):
-
-
+        def escribeTexto(texto: str, tamanio: int, x: any, y: any, fuente):
             """ Genenera un texto en pantalla con la FUENTE y color de texto elegidos en la 
             posicion "x" e "y" de la pantalla con el texto elegido. """
-
-
-            img = pygame.font.Font("fnt/8-Bit.TTF", tamanio).render(texto, True, colorTexto)
-
-            PANTALLA.blit(img, (x, y) )  
+            anchoPantalla, altoPantalla = pygame.display.get_window_size()
+            escala_x = anchoPantalla / self.ANCHO_PANTALLA
+            escala_y = altoPantalla / self.ALTO_PANTALLA
+            if escala_x > escala_y:
+                escala = escala_y
+            else:
+                escala = escala_x
+                
+            if fuente == "arialblack":
+                imagen = pygame.font.SysFont(fuente, tamanio).render(texto, True, (255, 255, 255))
+            else:
+                imagen = pygame.font.Font(fuente, tamanio).render(texto, True, (255, 255, 255))
+            
+            ancho = imagen.get_width()
+            alto = imagen.get_height()
+            rectangulo = imagen.get_rect()
+            if x != 0: 
+                x-= self.ANCHO_PANTALLA/2
+            y-= self.ALTO_PANTALLA/2
+            
+            nueva_y = altoPantalla/2 - (alto * escala)/2 + y * escala
+            nueva_x = anchoPantalla/2 - (ancho * escala)/2 + x * escala
+            rectangulo[1] = rectangulo[1] * escala 
+            rectangulo[0] = rectangulo[0] * escala
+            rectangulo.topleft = (nueva_x,nueva_y)
+            pygame.display.get_surface().blit(pygame.transform.scale(imagen, (ancho * escala, alto * escala)), (nueva_x,nueva_y))
 
 
         def continuarJuego():
@@ -323,13 +305,16 @@ class Juego:
                         continue
                     else:
                         if actualizarRegistro(linea[:-1], registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
+                
                 archivo.close()
                 for celdaElegida in HEX_TABLERO:
                     celdaElegida.estado = None
+                
                 archivo = open("registro/Estado tablero.txt","r")
                 for linea in archivo.readlines():
                     palabras:str = linea.split(" ")
                     HEX_TABLERO.__setitem__(HexCoord(float(palabras[0][1:-1]),float(palabras[1][:-1]),float(palabras[2][:-1])), palabras[3][:-1])
+                
                 archivo.close()
                 archivo = None
 
@@ -337,28 +322,29 @@ class Juego:
         actualizaElTurno()
         self.continuar = False
 
+        # Se comienza a reproducir la musica
+        if self.reproducirMusica:
+            if not pygame.mixer.music.get_busy():
+                siguiente_cancion = random.choice(self.lista_canciones)
+                pygame.mixer.music.load(siguiente_cancion)
+                pygame.mixer.music.play(-1)
 
         # Bucle del juego:
-
-
         while self.juegoEjecutandose[0]:
-
-            if self.reproducir_musica:
-
-                if not pygame.mixer.music.get_busy():
-
-                    siguiente_cancion = random.choice(self.lista_canciones)
-
-                    pygame.mixer.music.load(siguiente_cancion)
-
-                    pygame.mixer.music.play(-1)
+            anchoPantalla, altoPantalla = pygame.display.get_surface().get_size()
+            escala_x = anchoPantalla / self.ANCHO_PANTALLA
+            escala_y = altoPantalla / self.ALTO_PANTALLA
+            if escala_x > escala_y:
+                escala = escala_y
+            else:
+                escala = escala_x
+            
+            # El radio de un hexagono individual en pantalla, en pixeles.
+            ADAPTADOR.radioHexagonal = 34 * escala
+            ADAPTADOR.origen = PixelCoord(anchoPantalla / 2 - 204 * escala, altoPantalla / 2)
 
             for evento in pygame.event.get():
-
-
-                # Si se pulsa la cruz para salir, se cierra la ventana y el programa.
-                
-
+                # Si se pulsa la cruz para salir, se cierra la ventana y el programa. 
                 if evento.type == pygame.QUIT:
                     guardarJuego()
                     pygame.quit()
@@ -386,8 +372,8 @@ class Juego:
 
                     # Si no hemos tomado una pieza:
                     if not piezaSeleccionada:
-                        # Si no hay nada que tomar:
 
+                        # Si no hay nada que tomar:
                         if piezaEnHexagono is None:
                             continue
 
@@ -402,7 +388,7 @@ class Juego:
                             if not ((self.turnoJugador == 0 and color == "b") or (self.turnoJugador == 1 and color == "n") or (self.turnoJugador == 2 and color == "r")):
                                 continue
                         
-                        Sonido().sonidoTomarPieza(self.reproducir_sonidos)
+                        Sonido().sonidoTomarPieza(self.reproducirSonidos)
                         piezaSeleccionada = piezaEnHexagono
                         coordPiezaInicial = coordSeleccion
                         movimientosValidos = HEX_TABLERO.generarMovimientos(
@@ -412,38 +398,34 @@ class Juego:
                     else:
                         if coordSeleccion in movimientosValidos:
                             guardarJuego()
-
-                            Sonido().sonidoSoltarPieza(self.reproducir_sonidos)
-
+                            Sonido().sonidoSoltarPieza(self.reproducirSonidos)
                             nuevoMov = HEX_TABLERO.moverPieza(
                                 coordPiezaInicial, coordSeleccion, "jugador")
                             if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
                             piezaSeleccionada = coordPiezaInicial = None
+                            
                             if nuevoMov != None:
+                                # Si se mueve de lugar:
                                 actualizaElTurno()
+
+                                # Permite al jugador deshacer este movimiento.
                                 sePuedeDeshacer = True
+                            
                             else: 
+                                # Si no se movio:
                                 sePuedeDeshacer = False
             
-            # se pone la pantalla de color blanco
+            # Se pone la pantalla de color blanco
             PANTALLA.fill((0, 0, 0))
 
-
-            # se muestra la pantalla del juego con la imagen "Fondo_Juego.jpg"
-
-            PANTALLA.blit(pygame.transform.scale(pygame.image.load(
-
-                f"img/Fondo_Juego.png").convert_alpha(), (700, 710)), (0, 0))
-
-            PANTALLA.blit(pygame.transform.scale(pygame.image.load(
-
-                f"img/Fondo_Estado.png").convert_alpha(), (410, 710)), (700, 0))
-            
+            # Se muestra la pantalla del juego con el fondo del juego.
+            self.fondoJuegoImg.dibujar(0,0)
+            self.fondoJuegoLetrasImg.dibujar(*ORIGEN_JUEGO)
+            self.fondoEstadoImg.dibujar(*AREA_ESTADO)
 
             # Se dibuja la linea que va a separar el tablero con la interfaz de turnos.
-
-            pygame.draw.line(PANTALLA, (62, 48, 92), (ANCHO_JUEGO+10, 0), (ANCHO_JUEGO+10, ALTO_JUEGO + 20), 15)
-            
+            pygame.draw.line(PANTALLA, (62, 48, 92), (anchoPantalla / 2 + 155 * escala, altoPantalla / 2 - self.ALTO_PANTALLA / 2 * escala), (anchoPantalla / 2 + 155 * escala, altoPantalla / 2 + self.ALTO_PANTALLA / 2 * escala), int(18 * escala))
+            pygame.draw.line(PANTALLA, (62, 48, 92), (anchoPantalla / 2 + (AREA_ESTADO[0]+200) * escala, 0), (anchoPantalla / 2 + (AREA_ESTADO[0]+200) * escala, altoPantalla), int(18 * escala))
 
             # Dibuja los hexagonos de color.
             for celda in HEX_TABLERO:
@@ -472,84 +454,76 @@ class Juego:
             # Dibuja el borde negro de los hexagonos y dibuja las piezas.
             for celda in HEX_TABLERO:
                 dibujaHex(celda.coordenada, (20, 20, 20))
-                dibujarPiezas(celda, 1)
+                dibujarPiezas(celda, escala)
             
             # Si estamos sosteniendo una pieza se dibuja en la posicion del mouse.
             if piezaSeleccionada:
                 imagen = imagenesDePiezas[piezaSeleccionada]
-                PANTALLA.blit(pygame.transform.scale(imagen, (imagen.get_width() * 1, imagen.get_height() * 1))
+                PANTALLA.blit(pygame.transform.scale(imagen, (imagen.get_width() * escala, imagen.get_height() * escala))
                     , pygame.mouse.get_pos())
             
             # Dibuja los movimientos guardados en el registro
             for i in range(15):
                 if 0 <= (i + desplazamientoRegistro) < len(registroMovimientos):
-
-                    escribeTexto(registroMovimientos[i + desplazamientoRegistro], 15 , (ANCHO_JUEGO + 30) , (145 + i * 35), (255,255,255))
-
-
-            if botonDesplazamientoArriba.dibujar():
-
+                    escribeTexto(registroMovimientos[i + desplazamientoRegistro], 15 , (self.ANCHO_PANTALLA / 2 + self.ANCHO_PANTALLA * .16+160) , (145 + i * 35), "fnt/8-Bit.TTF")
+            if self.botonDesplazamientoArriba.dibujar():
                 if desplazamientoRegistro > 0: 
                             desplazamientoRegistro -= 1
-            
-
-            if botonDesplazamientoAbajo.dibujar():
-
+            if self.botonDesplazamientoAbajo.dibujar():
                 desplazamientoRegistro += 1
             
             # Posibilidad de deshacer una jugada, solo para el modo facil.
             if dificultad == "Facil" and sePuedeDeshacer and piezaSeleccionada==None:
-                if botonDeshacer.dibujar():
+                if self.botonDeshacer.dibujar():
                     registroMovimientos = []
                     HEX_TABLERO.turno -= 1
                     continuarJuego()
                     actualizaElTurno()
                     sePuedeDeshacer = False
             
+            # Botón de pausa
+            if self.botonPausa.dibujar():
+                guardarJuego()
+                pausa[0] = not pausa[0]
+                juegoEjecutandose[0] = False
+            
             # Describe de quien es el turno:
-
-
-            escribeTexto("Turno del jugador", 20, (ANCHO_JUEGO+55), 38,(255,255,255))
-
-            escribeTexto(self.turnoTexto, 20, (ANCHO_JUEGO+165), 64,(255,255,255))
-
+            escribeTexto("Turno del jugador", 20, (AREA_JUEGO[0]+210), 38, "fnt/8-Bit.TTF")
+            escribeTexto(self.turnoTexto, 20, (AREA_JUEGO[0]+205), 64, "fnt/8-Bit.TTF")
 
             # Describe el estado de Jaque:
-
-
-            escribeTexto(self.estadoRey, 15, (ANCHO_JUEGO+10+len(self.estadoRey)), 95,(255,255,255))
-            
+            escribeTexto(self.estadoRey, 15, (AREA_JUEGO[0]+210), 95, "fnt/8-Bit.TTF")
 
             # Actualiza la pantalla.
             pygame.display.flip()
             
             # Realiza los movimientos de un Bot.
             if self.turnoJugador > 0 and self.bot:
+                
                 # Se designa el bot al que le toca jugar.
                 bot = self.botNegro if self.turnoJugador == 1 else self.botRojo
+                if HEX_TABLERO.elReyExiste("b") and not HEX_TABLERO.elReyEstaAhogado("b"):
+                    
+                    # Se muestra en pantalla un mensaje mientras piensa el bot.
+                    pantallaEspera = pygame.Surface((440 * escala, 150 * escala))
+                    pantallaEspera.set_alpha(128)
+                    pantallaEspera.fill((0,0,0))
+                    PANTALLA.blit(pantallaEspera, (anchoPantalla / 2 - 420*escala, altoPantalla / 2 - 70*escala))
+                    
+                    escribeTexto("El jugador "+("Negro" if self.turnoJugador == 1 else "Rojo"), 20, 350, 330, "arialblack")
+                    escribeTexto("está jugando, espere por favor...", 20, 350, 370, "arialblack")
+                    pygame.display.flip()
                 
-
-                pygame.draw.rect(PANTALLA, (0, 0, 0), (150, 280, 400, 150))
-
-                textoJugador = FUENTE_MINUSCULA.render("El jugador "+("Negro" if self.turnoJugador == 1 else "Rojo") , True, (255, 255, 255))
-
-                PANTALLA.blit(textoJugador, (350-textoJugador.get_width()/2, 350-textoJugador.get_height()))
-
-                texto = FUENTE_MINUSCULA.render("está jugando, espere por favor..." , True, (255, 255, 255))
-
-                PANTALLA.blit(texto, (350-texto.get_width()/2, 380-texto.get_height()))
-
-                pygame.display.flip()
-
+                # El bot realiza su movimiento.
                 movimiento = bot.mover(HEX_TABLERO)
-                
 
                 if movimiento != None:
-
-                    Sonido().sonidoSoltarPieza(self.reproducir_sonidos)
-
+                    
+                    # Si pudo moverse, realiza el sonido y actualiza los valores del registro.
+                    Sonido().sonidoSoltarPieza(self.reproducirSonidos)
                     (hexInicialBot[self.turnoJugador-1], hexFinalBot[self.turnoJugador-1]), nuevoMov = movimiento
                     if actualizarRegistro(nuevoMov, registroMovimientos): desplazamientoRegistro = len(registroMovimientos) - 15
                 
                 actualizaElTurno()
+                pantallaEspera = None
                 

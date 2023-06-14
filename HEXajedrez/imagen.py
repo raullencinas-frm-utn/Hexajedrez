@@ -3,8 +3,8 @@ import pygame
 class Imagen:
     def __init__(self, direccion):
         """Constructor de una imagen."""
-        self.anchoPantalla = 1100
-        self.altoPantalla = 700
+        self.anchoPantalla, self.altoPantalla = pygame.display.get_surface().get_size()
+        self.direccion = direccion
         self.imagen = pygame.image.load(direccion).convert_alpha()
         self.ancho = self.imagen.get_width()
         self.alto = self.imagen.get_height()
@@ -15,6 +15,7 @@ class Imagen:
         anchoPantalla, altoPantalla = pygame.display.get_surface().get_size()
         escala_x = anchoPantalla / self.anchoPantalla
         escala_y = altoPantalla / self.altoPantalla
+        
         if escala_x > escala_y:
             escala = escala_y
         else:
@@ -29,8 +30,7 @@ class Imagen:
                 escala = escala_y
             else:
                 escala = escala_x
-        #self.ancho = self.ancho * escala
-        #self.alto = self.alto * escala
+
         nueva_y = altoPantalla/2 - (self.alto * escala)/2 + y * escala
         nueva_x = anchoPantalla/2 - (self.ancho * escala)/2 + x * escala
         self.rectangulo[1] = self.rectangulo[1] * escala 

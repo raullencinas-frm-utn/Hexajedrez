@@ -61,7 +61,7 @@ class HexCoord:
         """Una representacion facil de usar."""
         return f"({self.p}, {self.q}, {self.r})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """La representacion de un codificador."""
         return f"HexCoord({self.p}, {self.q}, {self.r})"
 
